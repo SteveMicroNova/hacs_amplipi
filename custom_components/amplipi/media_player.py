@@ -13,7 +13,7 @@ from homeassistant.components.media_player.browse_media import (
 )
 from homeassistant.components.media_player.const import SUPPORT_PAUSE, SUPPORT_NEXT_TRACK, MEDIA_TYPE_MUSIC, \
     SUPPORT_PREVIOUS_TRACK, SUPPORT_TURN_ON, SUPPORT_TURN_OFF, SUPPORT_GROUPING, SUPPORT_VOLUME_STEP, SUPPORT_STOP, \
-    SUPPORT_BROWSE_MEDIA, SERVICE_MEDIA_PLAY_PAUSE
+    SUPPORT_BROWSE_MEDIA
 from homeassistant.const import CONF_NAME, STATE_OFF, STATE_PLAYING, STATE_PAUSED, STATE_IDLE, STATE_UNKNOWN
 from homeassistant.helpers.entity import DeviceInfo
 from pyamplipi.amplipi import AmpliPi
@@ -40,14 +40,21 @@ SUPPORT_AMPLIPI_ANNOUNCE = (
 )
 
 SUPPORT_LOOKUP_DICT = {
-    'play': SERVICE_MEDIA_PLAY_PAUSE,
-    'pause': SERVICE_MEDIA_PLAY_PAUSE,
-    # 'play/pause': MEDIA_PLAY_PAUSE,
+    'play': SUPPORT_PLAY,
+    'pause': SUPPORT_PAUSE,
     'stop': SUPPORT_STOP,
     'next': SUPPORT_NEXT_TRACK,
     'prev': SUPPORT_PREVIOUS_TRACK,
 }
 
+SUPPORT_AMPLIPI_ZONE = (
+        SUPPORT_SELECT_SOURCE
+        | SUPPORT_VOLUME_MUTE
+        | SUPPORT_VOLUME_SET
+        | SUPPORT_VOLUME_STEP
+        | SUPPORT_BROWSE_MEDIA
+        | SUPPORT_PLAY_MEDIA
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -151,7 +158,6 @@ class AmpliPiSource(MediaPlayerEntity):
 
     async def async_set_volume_level(self, volume):
         if volume is None:
-            _LOGGER.error("Volume not passed to async_set_volume_level in media_player.py!")
             return
         _LOGGER.warning(f"setting volume to {volume}")
         
