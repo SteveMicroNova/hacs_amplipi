@@ -216,11 +216,11 @@ class AmpliPiSource(MediaPlayerEntity):
         await self._client.pause_stream(self._current_stream.id)
         await self.async_update()
 
-    async def async_media_play_pause(self):
-        if self.state == MediaPlayerState.PLAYING:
-            self.async_media_pause()
-        elif self.state == MediaPlayerState.PAUSED:
-            self.async_media_play()
+    # async def async_media_play_pause(self):
+    #     if self.state == MediaPlayerState.PLAYING:
+    #         self.async_media_pause()
+    #     elif self.state == MediaPlayerState.PAUSED:
+    #         self.async_media_play()
 
     async def async_media_previous_track(self):
         await self._client.previous_stream(self._current_stream.id)
@@ -970,11 +970,11 @@ class AmpliPiZone(MediaPlayerEntity):
         await self._client.pause_stream(self._current_stream.id)
         await self.async_update()
 
-    async def async_media_play_pause(self):
-        if self.state == MediaPlayerState.PLAYING:
-            self.async_media_pause()
-        elif self.state == MediaPlayerState.PAUSED:
-            self.async_media_play()
+    # async def async_media_play_pause(self):
+    #     if self.state == MediaPlayerState.PLAYING:
+    #         self.async_media_pause()
+    #     elif self.state == MediaPlayerState.PAUSED:
+    #         self.async_media_play()
 
     async def async_media_previous_track(self):
         await self._client.previous_stream(self._current_stream.id)
