@@ -11,9 +11,9 @@ from homeassistant.components.media_player import MediaPlayerDeviceClass, MediaP
 from homeassistant.components.media_player.browse_media import (
     async_process_play_media_url,
 )
-from homeassistant.components.media_player.const import SUPPORT_PAUSE, SUPPORT_NEXT_TRACK, MEDIA_TYPE_MUSIC, \
-    SUPPORT_PREVIOUS_TRACK, SUPPORT_TURN_ON, SUPPORT_TURN_OFF, SUPPORT_GROUPING, SUPPORT_VOLUME_STEP, SUPPORT_STOP, \
-    SUPPORT_BROWSE_MEDIA
+from homeassistant.components.media_player.const import MediaPlayerState, SUPPORT_PAUSE, SUPPORT_NEXT_TRACK, \
+    MEDIA_TYPE_MUSIC, SUPPORT_PREVIOUS_TRACK, SUPPORT_TURN_ON, SUPPORT_TURN_OFF, SUPPORT_GROUPING, \
+    SUPPORT_VOLUME_STEP, SUPPORT_STOP, SUPPORT_BROWSE_MEDIA
 from homeassistant.const import CONF_NAME, STATE_OFF, STATE_PLAYING, STATE_PAUSED, STATE_IDLE, STATE_UNKNOWN
 from homeassistant.helpers.entity import DeviceInfo
 from pyamplipi.amplipi import AmpliPi
@@ -215,6 +215,12 @@ class AmpliPiSource(MediaPlayerEntity):
     async def async_media_pause(self):
         await self._client.pause_stream(self._current_stream.id)
         await self.async_update()
+
+    async def async_media_play_pause(self):
+        if self.state == MediaPlayerState.PLAYING:
+            self.async_media_pause()
+        elif self.state == MediaPlayerState.PAUSED:
+            self.async_media_play()
 
     async def async_media_previous_track(self):
         await self._client.previous_stream(self._current_stream.id)
