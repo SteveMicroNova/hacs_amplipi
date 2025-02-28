@@ -28,6 +28,7 @@ SUPPORT_AMPLIPI_DAC = (
         | MediaPlayerEntityFeature.GROUPING
         | MediaPlayerEntityFeature.VOLUME_STEP
         | MediaPlayerEntityFeature.BROWSE_MEDIA
+        | MediaPlayerEntityFeature.TURN_OFF
 )
 
 SUPPORT_AMPLIPI_ANNOUNCE = (
@@ -42,16 +43,8 @@ SUPPORT_LOOKUP_DICT = {
     'stop': MediaPlayerEntityFeature.STOP,
     'next': MediaPlayerEntityFeature.NEXT_TRACK,
     'prev': MediaPlayerEntityFeature.PREVIOUS_TRACK,
+    'toggle': MediaPlayerEntityFeature.TURN_OFF,
 }
-
-SUPPORT_AMPLIPI_ZONE = (
-        MediaPlayerEntityFeature.SELECT_SOURCE
-        | MediaPlayerEntityFeature.VOLUME_MUTE
-        | MediaPlayerEntityFeature.VOLUME_SET
-        | MediaPlayerEntityFeature.VOLUME_STEP
-        | MediaPlayerEntityFeature.BROWSE_MEDIA
-        | MediaPlayerEntityFeature.PLAY_MEDIA
-)
 
 _LOGGER = logging.getLogger(__name__)
 
