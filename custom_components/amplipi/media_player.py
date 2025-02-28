@@ -6,14 +6,11 @@ from typing import List
 
 import validators
 from homeassistant.components import media_source
-from homeassistant.components.media_player import MediaPlayerDeviceClass, MediaPlayerEntity, SUPPORT_VOLUME_MUTE, \
-    SUPPORT_VOLUME_SET, SUPPORT_VOLUME_STEP, SUPPORT_SELECT_SOURCE, SUPPORT_PLAY_MEDIA, SUPPORT_PLAY
+from homeassistant.components.media_player import MediaPlayerDeviceClass, MediaPlayerEntity, MediaPlayerEntityFeature
 from homeassistant.components.media_player.browse_media import (
     async_process_play_media_url,
 )
-from homeassistant.components.media_player.const import MediaPlayerState, SUPPORT_PAUSE, SUPPORT_NEXT_TRACK, \
-    MEDIA_TYPE_MUSIC, SUPPORT_PREVIOUS_TRACK, SUPPORT_TURN_ON, SUPPORT_TURN_OFF, SUPPORT_GROUPING, \
-    SUPPORT_VOLUME_STEP, SUPPORT_STOP, SUPPORT_BROWSE_MEDIA
+from homeassistant.components.media_player.const import MEDIA_TYPE_MUSIC
 from homeassistant.const import CONF_NAME, STATE_OFF, STATE_PLAYING, STATE_PAUSED, STATE_IDLE, STATE_UNKNOWN
 from homeassistant.helpers.entity import DeviceInfo
 from pyamplipi.amplipi import AmpliPi
@@ -24,36 +21,36 @@ from .const import (
     DOMAIN, AMPLIPI_OBJECT, CONF_VENDOR, CONF_VERSION, CONF_WEBAPP, )
 
 SUPPORT_AMPLIPI_DAC = (
-        SUPPORT_SELECT_SOURCE
-        | SUPPORT_PLAY_MEDIA
-        | SUPPORT_VOLUME_MUTE
-        | SUPPORT_VOLUME_SET
-        | SUPPORT_GROUPING
-        | SUPPORT_VOLUME_STEP
-        | SUPPORT_BROWSE_MEDIA
+        MediaPlayerEntityFeature.SELECT_SOURCE
+        | MediaPlayerEntityFeature.PLAY_MEDIA
+        | MediaPlayerEntityFeature.VOLUME_MUTE
+        | MediaPlayerEntityFeature.VOLUME_SET
+        | MediaPlayerEntityFeature.GROUPING
+        | MediaPlayerEntityFeature.VOLUME_STEP
+        | MediaPlayerEntityFeature.BROWSE_MEDIA
 )
 
 SUPPORT_AMPLIPI_ANNOUNCE = (
-        SUPPORT_PLAY_MEDIA
-        | SUPPORT_BROWSE_MEDIA
-        | SUPPORT_VOLUME_SET
+        MediaPlayerEntityFeature.PLAY_MEDIA
+        | MediaPlayerEntityFeature.BROWSE_MEDIA
+        | MediaPlayerEntityFeature.VOLUME_SET
 )
 
 SUPPORT_LOOKUP_DICT = {
-    'play': SUPPORT_PLAY,
-    'pause': SUPPORT_PAUSE,
-    'stop': SUPPORT_STOP,
-    'next': SUPPORT_NEXT_TRACK,
-    'prev': SUPPORT_PREVIOUS_TRACK,
+    'play': MediaPlayerEntityFeature.PLAY,
+    'pause': MediaPlayerEntityFeature.PAUSE,
+    'stop': MediaPlayerEntityFeature.STOP,
+    'next': MediaPlayerEntityFeature.NEXT_TRACK,
+    'prev': MediaPlayerEntityFeature.PREVIOUS_TRACK,
 }
 
 SUPPORT_AMPLIPI_ZONE = (
-        SUPPORT_SELECT_SOURCE
-        | SUPPORT_VOLUME_MUTE
-        | SUPPORT_VOLUME_SET
-        | SUPPORT_VOLUME_STEP
-        | SUPPORT_BROWSE_MEDIA
-        | SUPPORT_PLAY_MEDIA
+        MediaPlayerEntityFeature.SELECT_SOURCE
+        | MediaPlayerEntityFeature.VOLUME_MUTE
+        | MediaPlayerEntityFeature.VOLUME_SET
+        | MediaPlayerEntityFeature.VOLUME_STEP
+        | MediaPlayerEntityFeature.BROWSE_MEDIA
+        | MediaPlayerEntityFeature.PLAY_MEDIA
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -1010,11 +1007,6 @@ class AmpliPiAnnouncer(MediaPlayerEntity):
     def media_content_type(self):
         """Content type of current playing media."""
         return MEDIA_TYPE_MUSIC
-    
-    @property
-    def media_content_type(self):
-        """Content type of current playing media."""
-        return "speaker"
     
     @property
     def entity_registry_enabled_default(self):
