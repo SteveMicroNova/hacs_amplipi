@@ -131,13 +131,13 @@ class AmpliPiSource(MediaPlayerEntity):
 
     async def async_turn_off(self):
         if self._source is not None:
-            _LOGGER.warning(f"disconnecting zones from source {self._unique_id}")
+            _LOGGER.warning(f"disconnecting zones from source {self._name}")
             await self._update_zones(
                 MultiZoneUpdate(
                     zones=[z.id for z in self._zones],
                     groups=[z.id for z in self._groups],
                     update=ZoneUpdate(
-                        source_id=None,
+                        source_id=-1,
                     )
                 )
             )
@@ -583,14 +583,14 @@ class AmpliPiZone(MediaPlayerEntity):
                 MultiZoneUpdate(
                     groups=[self._group.id],
                     update=ZoneUpdate(
-                        source_id=None,
+                        source_id=-1,
                     )
                 )
             )
         else:
             _LOGGER.info(f"Disconnecting zone from source {self._current_source}")
             await self._update_zone(ZoneUpdate(
-                source_id=None,
+                source_id=-1,
             ))
 
     async def async_mute_volume(self, mute):
