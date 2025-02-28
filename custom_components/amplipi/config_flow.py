@@ -44,7 +44,8 @@ async def async_retrieve_info(hass, host, port):
         raise
 
 
-class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
+# MyPy doesn't recognize domain as a valid kwarg, suppress that so the entire file doesn't get red spaghetti as a result
+class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN): # type: ignore [call-arg]
     """Handle a config flow for AmpliPi."""
 
     VERSION = 1

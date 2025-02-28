@@ -129,6 +129,18 @@ class AmpliPiSource(MediaPlayerEntity):
         self._last_update_successful = False
         self._attr_device_class = MediaPlayerDeviceClass.SPEAKER
 
+    async def async_turn_off(self):
+        if self._source is not None:
+            _LOGGER.warning(f"disconnecting zones from source {self._unique_id}")
+            await self._update_zones(
+                MultiZoneUpdate(
+                    zones=[z.id for z in self._zones],
+                    groups=[z.id for z in self._groups],
+                    update=ZoneUpdate(
+                        source_id=None,
+                    )
+                )
+            )
 
     async def async_mute_volume(self, mute):
         if mute is None:
@@ -528,24 +540,6 @@ class AmpliPiZone(MediaPlayerEntity):
             )
         #self.is_on = True
 
-    async def async_turn_off(self):
-        if self._is_group:
-            await self._update_group(
-                MultiZoneUpdate(
-                    groups=[self._group.id],
-                    update=ZoneUpdate(
-                        disabled=True,
-                    )
-                )
-            )
-        else:
-            await self._update_zone(
-                ZoneUpdate(
-                    disabled=True,
-                )
-            )
-        #self.is_on = False
-
     def __init__(self, namespace: str, zone, group,
                  streams: List[Stream], sources: List[Source],
                  vendor: str, version: str, image_base_path: str,
@@ -581,6 +575,23 @@ class AmpliPiZone(MediaPlayerEntity):
         self._available = False
         self._extra_attributes = []
         self._attr_device_class = MediaPlayerDeviceClass.SPEAKER
+
+    async def async_turn_off(self):
+        if self._is_group:
+            _LOGGER.info(f"Disconnecting zones from source {self._current_source}")
+            await self._update_group(
+                MultiZoneUpdate(
+                    groups=[self._group.id],
+                    update=ZoneUpdate(
+                        source_id=None,
+                    )
+                )
+            )
+        else:
+            _LOGGER.info(f"Disconnecting zone from source {self._current_source}")
+            await self._update_zone(ZoneUpdate(
+                source_id=None,
+            ))
 
     async def async_mute_volume(self, mute):
         if mute is None:
