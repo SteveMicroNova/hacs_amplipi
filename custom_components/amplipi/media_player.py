@@ -127,7 +127,8 @@ class AmpliPiSource(MediaPlayerEntity):
         self._client = client
         self._unique_id = f"{namespace}_source_{source.id}"
         self._last_update_successful = False
-        self._attr_device_class = MediaPlayerDeviceClass.SPEAKER
+        self._attr_device_class = MediaPlayerDeviceClass.RECEIVER
+
 
     async def async_turn_off(self):
         if self._source is not None:
@@ -300,7 +301,6 @@ class AmpliPiSource(MediaPlayerEntity):
         """Return flag of media commands that are supported."""
 
         supported_features = SUPPORT_AMPLIPI_DAC
-
         if self._source is not None and self._source.info is not None and len(self._source.info.supported_cmds) > 0:
             supported_features = supported_features | reduce(
                 operator.or_,
