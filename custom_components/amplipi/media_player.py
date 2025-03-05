@@ -575,22 +575,21 @@ class AmpliPiZone(MediaPlayerEntity):
         self._attr_device_class = MediaPlayerDeviceClass.SPEAKER
 
     async def async_turn_off(self):
-        if self._current_source is not None:
-            if self._is_group:
-                _LOGGER.info(f"Disconnecting zones from source {self._current_source}")
-                await self._update_group(
-                    MultiZoneUpdate(
-                        groups=[self._group.id],
-                        update=ZoneUpdate(
-                            source_id=-1,
-                        )
+        if self._is_group:
+            _LOGGER.info(f"Disconnecting zones from source {self._current_source}")
+            await self._update_group(
+                MultiZoneUpdate(
+                    groups=[self._group.id],
+                    update=ZoneUpdate(
+                        source_id=-1,
                     )
                 )
-            else:
-                _LOGGER.info(f"Disconnecting zone from source {self._current_source}")
-                await self._update_zone(ZoneUpdate(
-                    source_id=-1,
-                ))
+            )
+        else:
+            _LOGGER.info(f"Disconnecting zone from source {self._current_source}")
+            await self._update_zone(ZoneUpdate(
+                source_id=-1,
+            ))
 
     async def async_mute_volume(self, mute):
         if mute is None:
