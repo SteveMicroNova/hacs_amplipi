@@ -875,7 +875,7 @@ class AmpliPiZone(MediaPlayerEntity):
         """Returns the current source playing, if this is wrong it won't show up as the selected source on HomeAssistant"""
         if self._current_source is not None:
             return f'Source {self._current_source.id + 1}'
-        return None
+        return "None"
 
     async def async_browse_media(self, media_content_type=None, media_content_id=None):
         """Implement the websocket media browsing helper."""
