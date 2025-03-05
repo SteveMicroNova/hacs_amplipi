@@ -11,7 +11,7 @@ from homeassistant.components.media_player.browse_media import (
     async_process_play_media_url,
 )
 from homeassistant.components.media_player.const import MEDIA_TYPE_MUSIC
-from homeassistant.const import CONF_NAME, STATE_OFF, STATE_PLAYING, STATE_PAUSED, STATE_IDLE, STATE_UNKNOWN
+from homeassistant.const import CONF_NAME, STATE_PLAYING, STATE_PAUSED, STATE_IDLE, STATE_UNKNOWN
 from homeassistant.helpers.entity import DeviceInfo
 from pyamplipi.amplipi import AmpliPi
 from pyamplipi.models import ZoneUpdate, Source, SourceUpdate, GroupUpdate, Stream, Group, Zone, Announcement, \
@@ -127,7 +127,7 @@ class AmpliPiSource(MediaPlayerEntity):
         self._client = client
         self._unique_id = f"{namespace}_source_{source.id}"
         self._last_update_successful = False
-        self._attr_device_class = MediaPlayerDeviceClass.RECEIVER
+        self._attr_device_class = MediaPlayerDeviceClass.SPEAKER
 
 
     async def async_turn_off(self):
@@ -425,9 +425,7 @@ class AmpliPiSource(MediaPlayerEntity):
         """Return the state of the zone."""
         if self._last_update_successful is False:
             return STATE_UNKNOWN
-        elif self._source is None:
-            return STATE_OFF
-        elif self._source.info is None or self._source.info.state is None:
+        elif self._source is None or self._source.info is None or self._source.info.state is None:
             return STATE_IDLE
         elif self._source.info.state in (
                 'paused'
@@ -789,9 +787,7 @@ class AmpliPiZone(MediaPlayerEntity):
         """Return the state of the zone."""
         if self._last_update_successful is False:
             return STATE_UNKNOWN
-        elif self._current_source is None:
-            return STATE_OFF
-        elif self._current_source.info is None or self._current_source.info.state is None:
+        elif self._current_source or self._current_source.info is None or self._current_source.info.state is None:
             return STATE_IDLE
         elif self._current_source.info.state in (
                 'paused'
