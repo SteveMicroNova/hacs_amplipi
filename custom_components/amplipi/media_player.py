@@ -565,6 +565,7 @@ class AmpliPiZone(MediaPlayerEntity):
         self._client = client
         self._last_update_successful = False
         self._attr_source_list = [
+            'None',
             'Source 1',
             'Source 2',
             'Source 3',
@@ -582,14 +583,14 @@ class AmpliPiZone(MediaPlayerEntity):
                     MultiZoneUpdate(
                         groups=[self._group.id],
                         update=ZoneUpdate(
-                            source_id=-1,
+                            source_id=None,
                         )
                     )
                 )
             else:
                 _LOGGER.info(f"Disconnecting zone from source {self._current_source}")
                 await self._update_zone(ZoneUpdate(
-                    source_id=-1,
+                    source_id=None,
                 ))
 
     async def async_mute_volume(self, mute):
@@ -875,8 +876,10 @@ class AmpliPiZone(MediaPlayerEntity):
     def source(self):
         """Returns the current source playing, if this is wrong it won't show up as the selected source on HomeAssistant"""
         if self._current_source is not None:
-            return f'Source {self._current_source.id + 1}'
-        return "None"
+            if self._current_source is not "None":
+                return f'Source {self._current_source.id + 1}'
+            return "None"
+        return None
 
     async def async_browse_media(self, media_content_type=None, media_content_id=None):
         """Implement the websocket media browsing helper."""
