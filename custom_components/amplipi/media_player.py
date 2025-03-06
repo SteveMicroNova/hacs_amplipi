@@ -6,11 +6,10 @@ from typing import List
 
 import validators
 from homeassistant.components import media_source
-from homeassistant.components.media_player import MediaPlayerDeviceClass, MediaPlayerEntity, MediaPlayerEntityFeature
+from homeassistant.components.media_player import MediaPlayerDeviceClass, MediaPlayerEntity, MediaPlayerEntityFeature, MediaType
 from homeassistant.components.media_player.browse_media import (
     async_process_play_media_url,
 )
-from homeassistant.components.media_player.const import MEDIA_TYPE_MUSIC
 from homeassistant.const import CONF_NAME, STATE_PLAYING, STATE_PAUSED, STATE_IDLE, STATE_UNKNOWN
 from homeassistant.helpers.entity import DeviceInfo
 from pyamplipi.amplipi import AmpliPi
@@ -315,7 +314,7 @@ class AmpliPiSource(MediaPlayerEntity):
     @property
     def media_content_type(self):
         """Content type of current playing media."""
-        return MEDIA_TYPE_MUSIC
+        return MediaType.MUSIC
 
     @property
     def entity_registry_enabled_default(self):
@@ -565,7 +564,6 @@ class AmpliPiZone(MediaPlayerEntity):
         self._client = client
         self._last_update_successful = False
         self._attr_source_list = [
-            'None',
             'Source 1',
             'Source 2',
             'Source 3',
@@ -1010,7 +1008,7 @@ class AmpliPiAnnouncer(MediaPlayerEntity):
     @property
     def media_content_type(self):
         """Content type of current playing media."""
-        return MEDIA_TYPE_MUSIC
+        return MediaType.MUSIC
     
     @property
     def entity_registry_enabled_default(self):
