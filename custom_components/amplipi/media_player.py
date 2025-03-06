@@ -543,7 +543,7 @@ class AmpliPiZone(MediaPlayerEntity):
                  vendor: str, version: str, image_base_path: str,
                  client: AmpliPi):
         self._current_source = None
-        self._sources = sources
+        self._sources = ["None", *sources]
         self._is_group = group is not None
 
         if self._is_group:
