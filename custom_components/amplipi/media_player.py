@@ -789,7 +789,7 @@ class AmpliPiZone(MediaPlayerEntity):
         """Return the state of the zone."""
         if self._last_update_successful is False:
             return STATE_UNKNOWN
-        elif self._current_source or self._current_source.info is None or self._current_source.info.state is None:
+        elif self._current_source is None or self._current_source == -1 or self._current_source.info is None or self._current_source.info.state is None:
             return STATE_IDLE
         elif self._current_source.info.state in (
                 'paused'
@@ -864,7 +864,7 @@ class AmpliPiZone(MediaPlayerEntity):
     @property
     def source_list(self):
         """List of available input sources."""
-        source_list = [None]
+        source_list = []
         source_num = 1
         if self._sources is not None:
             for _ in self._sources:
