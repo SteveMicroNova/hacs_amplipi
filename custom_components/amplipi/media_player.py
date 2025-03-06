@@ -661,13 +661,7 @@ class AmpliPiZone(MediaPlayerEntity):
 
         supported_features = SUPPORT_AMPLIPI_DAC
         if self._current_source is not None and self._current_source.info is not None and len(self._current_source.info.supported_cmds) > 0:
-            supported_features = supported_features | reduce(
-                operator.or_,
-                [
-                    ZONE_SUPPORT_LOOKUP_DICT.get(key) for key
-                    in (ZONE_SUPPORT_LOOKUP_DICT.keys() & self._current_source.info.supported_cmds)
-                ]
-            )
+            supported_features = ZONE_SUPPORT_LOOKUP_DICT
         return supported_features
 
     @property
