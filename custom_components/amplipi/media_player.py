@@ -81,10 +81,9 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
 
     status = await amplipi.get_status()
 
-    sources: list[MediaPlayerEntity] = [
-        # AmpliPiSource(DOMAIN, Source(-1, "None", "None"), status.streams, vendor, version, image_base_path, amplipi),
-        (AmpliPiSource(DOMAIN, source, status.streams, vendor, version, image_base_path, amplipi)
-        for source in status.sources)]
+    list_sources = [AmpliPiSource(DOMAIN, Source(id=-1, name="None", input="None"), status.streams, vendor, version, image_base_path, amplipi),]
+    list_sources.extend(AmpliPiSource(DOMAIN, source, status.streams, vendor, version, image_base_path, amplipi) for source in status.sources)
+    sources: list[MediaPlayerEntity] = list_sources
 
     zones: list[MediaPlayerEntity] = [
         AmpliPiZone(DOMAIN, zone, None, status.streams, status.sources, vendor, version, image_base_path, amplipi)
