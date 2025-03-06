@@ -864,7 +864,7 @@ class AmpliPiZone(MediaPlayerEntity):
     @property
     def source_list(self):
         """List of available input sources."""
-        source_list = ['None', 'None', 'None', 'None']
+        source_list = [None]
         source_num = 1
         if self._sources is not None:
             for _ in self._sources:
