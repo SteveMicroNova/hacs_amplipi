@@ -37,12 +37,15 @@ SUPPORT_AMPLIPI_ANNOUNCE = (
         | MediaPlayerEntityFeature.VOLUME_SET
 )
 
-SUPPORT_LOOKUP_DICT = {
+SOURCE_SUPPORT_LOOKUP_DICT = {
     'play': MediaPlayerEntityFeature.PLAY,
     'pause': MediaPlayerEntityFeature.PAUSE,
     'stop': MediaPlayerEntityFeature.STOP,
     'next': MediaPlayerEntityFeature.NEXT_TRACK,
-    'prev': MediaPlayerEntityFeature.PREVIOUS_TRACK,
+    'toggle': MediaPlayerEntityFeature.TURN_OFF,
+}
+
+ZONE_SUPPORT_LOOKUP_DICT = {
     'toggle': MediaPlayerEntityFeature.TURN_OFF,
 }
 
@@ -305,8 +308,8 @@ class AmpliPiSource(MediaPlayerEntity):
             supported_features = supported_features | reduce(
                 operator.or_,
                 [
-                    SUPPORT_LOOKUP_DICT.get(key) for key
-                    in (SUPPORT_LOOKUP_DICT.keys() & self._source.info.supported_cmds)
+                    SOURCE_SUPPORT_LOOKUP_DICT.get(key) for key
+                    in (SOURCE_SUPPORT_LOOKUP_DICT.keys() & self._source.info.supported_cmds)
                 ]
             )
 
@@ -661,8 +664,8 @@ class AmpliPiZone(MediaPlayerEntity):
             supported_features = supported_features | reduce(
                 operator.or_,
                 [
-                    SUPPORT_LOOKUP_DICT.get(key) for key
-                    in (SUPPORT_LOOKUP_DICT.keys() & self._current_source.info.supported_cmds)
+                    ZONE_SUPPORT_LOOKUP_DICT.get(key) for key
+                    in (ZONE_SUPPORT_LOOKUP_DICT.keys() & self._current_source.info.supported_cmds)
                 ]
             )
         return supported_features
