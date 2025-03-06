@@ -543,7 +543,7 @@ class AmpliPiZone(MediaPlayerEntity):
                  vendor: str, version: str, image_base_path: str,
                  client: AmpliPi):
         self._current_source = None
-        self._sources = ["None", *sources]
+        self._sources = sources
         self._is_group = group is not None
 
         if self._is_group:
@@ -583,14 +583,14 @@ class AmpliPiZone(MediaPlayerEntity):
                     MultiZoneUpdate(
                         groups=[self._group.id],
                         update=ZoneUpdate(
-                            source_id=None,
+                            source_id=-1,
                         )
                     )
                 )
             else:
                 _LOGGER.info(f"Disconnecting zone from source {self._current_source}")
                 await self._update_zone(ZoneUpdate(
-                    source_id=None,
+                    source_id=-1,
                 ))
 
     async def async_mute_volume(self, mute):
