@@ -43,6 +43,7 @@ SUPPORT_LOOKUP_DICT = {
     'next': MediaPlayerEntityFeature.NEXT_TRACK,
     'prev': MediaPlayerEntityFeature.PREVIOUS_TRACK,
     'toggle': MediaPlayerEntityFeature.TURN_OFF,
+    'join': MediaPlayerEntityFeature.GROUPING,
 }
 
 _LOGGER = logging.getLogger(__name__)
