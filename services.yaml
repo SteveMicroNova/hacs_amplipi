@@ -1,5 +1,5 @@
 set_audio_routing:
-  description: "Sets the audio source and output zone for a media player"
+  description: "Sets the audio source and output zone for AmpliPi"
   fields:
     stream:
       description: "The stream to play"

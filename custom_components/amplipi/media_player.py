@@ -126,7 +126,7 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
             "entity_id": source,
             "source": zone
         })
-    hass.services.async_register("your_custom_domain", "set_audio_routing", handle_set_audio_routing)
+    hass.services.async_register("AmpliPi", "set_audio_routing", handle_set_audio_routing)
 
 
 async def async_remove_entry(hass, entry) -> None:
