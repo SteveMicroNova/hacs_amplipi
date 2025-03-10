@@ -1,5 +1,6 @@
 {
   "name": "AmpliPi",
+  "image": "logo.png",
   "domains": ["media_player"],
   "iot_class": "local_polling",
   "render_readme": true
