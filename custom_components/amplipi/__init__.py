@@ -1,5 +1,7 @@
 """The AmpliPi integration."""
 from __future__ import annotations
+import os
+import shutil
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_HOST, CONF_PORT, CONF_NAME, CONF_ID
@@ -10,6 +12,27 @@ from pyamplipi.amplipi import AmpliPi
 from .const import DOMAIN, AMPLIPI_OBJECT, CONF_VENDOR, CONF_VERSION, CONF_WEBAPP, CONF_API_PATH
 
 PLATFORMS = ["media_player"]
+
+async def setup(hass, config):
+    """Set up the integration and copy all blueprints if missing."""
+    source_dir = os.path.join(os.path.dirname(__file__), "blueprints", "automation")
+    dest_dir = os.path.join(hass.config.path("blueprints/automation/your_plugin"))
+
+    if not os.path.exists(source_dir):
+        return True
+
+    os.makedirs(dest_dir, exist_ok=True)
+
+    for root, _, files in os.walk(source_dir):
+        for file in files:
+            if file.endswith(".yaml"):  # Ensure only YAML files are copied
+                src_path = os.path.join(root, file)
+                rel_path = os.path.relpath(src_path, source_dir)  # Maintain subdirectory structure if needed
+                dest_path = os.path.join(dest_dir, rel_path)
+
+                if not os.path.exists(dest_path):  # Avoid overwriting user-modified files
+                    os.makedirs(os.path.dirname(dest_path), exist_ok=True)
+                    shutil.copy(src_path, dest_path)
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
