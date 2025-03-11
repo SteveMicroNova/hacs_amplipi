@@ -16,7 +16,7 @@ PLATFORMS = ["media_player"]
 async def setup(hass, config):
     """Set up the integration and copy all blueprints if missing."""
     source_dir = os.path.join(os.path.dirname(__file__), "blueprints", "automation")
-    dest_dir = os.path.join(hass.config.path("blueprints/automation/hacs_amplipi"))
+    dest_dir = os.path.join(hass.config.path("blueprints/automation/SteveMicroNova"))
 
     if not os.path.exists(source_dir):
         return True
