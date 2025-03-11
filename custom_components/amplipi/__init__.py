@@ -13,31 +13,9 @@ from .const import DOMAIN, AMPLIPI_OBJECT, CONF_VENDOR, CONF_VERSION, CONF_WEBAP
 
 PLATFORMS = ["media_player"]
 
-async def setup(hass, config):
-    """Set up the integration and copy all blueprints if missing."""
-    source_dir = os.path.join(os.path.dirname(__file__), "blueprints", "automation")
-    dest_dir = os.path.join(hass.config.path("blueprints/automation/SteveMicroNova"))
-
-    if not os.path.exists(source_dir):
-        return True
-
-    os.makedirs(dest_dir, exist_ok=True)
-
-    for root, _, files in os.walk(source_dir):
-        for file in files:
-            if file.endswith(".yaml"):
-                src_path = os.path.join(root, file)
-                rel_path = os.path.relpath(src_path, source_dir)
-                dest_path = os.path.join(dest_dir, rel_path)
-
-                if not os.path.exists(dest_path):
-                    os.makedirs(os.path.dirname(dest_path), exist_ok=True)
-                    shutil.copy(src_path, dest_path)
-    return True
-
-
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
-
+    """Set up AmpliPi from a config entry and ensure blueprints are installed."""
+    
     hass.data.setdefault(DOMAIN, {})[entry.entry_id] = {
         AMPLIPI_OBJECT: AmpliPi(
             f'http://{entry.data[CONF_HOST]}:{entry.data[CONF_PORT]}/api/',
@@ -54,6 +32,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         CONF_API_PATH: entry.data[CONF_API_PATH],
     }
 
+    # Copy all blueprints to Home Assistant's blueprints directory
+    await hass.async_add_executor_job(copy_blueprints, hass)
+
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
     return True
@@ -66,3 +47,25 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         hass.data[DOMAIN].pop(entry.entry_id)
 
     return unload_ok
+
+
+def copy_blueprints(hass: HomeAssistant):
+    """Recursively copy all blueprints from the integration directory to Home Assistant's blueprints folder."""
+    source_dir = os.path.join(os.path.dirname(__file__), "blueprints", "automation")
+    dest_dir = os.path.join(hass.config.path("blueprints/automation/SteveMicroNova"))
+
+    if not os.path.exists(source_dir):
+        return
+
+    os.makedirs(dest_dir, exist_ok=True)
+
+    for root, _, files in os.walk(source_dir):
+        for file in files:
+            if file.endswith(".yaml"):  # Ensure only YAML files are copied
+                src_path = os.path.join(root, file)
+                rel_path = os.path.relpath(src_path, source_dir)  # Preserve subdirectory structure if needed
+                dest_path = os.path.join(dest_dir, rel_path)
+
+                if not os.path.exists(dest_path):  # Avoid overwriting user-modified files
+                    os.makedirs(os.path.dirname(dest_path), exist_ok=True)
+                    shutil.copy(src_path, dest_path)
