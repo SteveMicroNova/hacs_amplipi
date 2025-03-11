@@ -1,0 +1,48 @@
+blueprint:
+  name: "Home Audio Connection"
+  description: "Connect a Source to a Stream and assign Zone(s) to the Source."
+  domain: automation
+  input:
+    source:
+      name: "Source"
+      description: "Select the source"
+      selector:
+        entity:
+          domain: media_player
+    stream:
+      name: "Stream"
+      description: "Select the audio stream."
+      selector:
+        entity:
+          domain: media_player
+    zones:
+      name: "Zones"
+      description: "Select one or more zones for audio output."
+      selector:
+        entity:
+          domain: media_player
+          multiple: true
+
+mode: single
+
+trigger:
+  - platform: event
+    event_type: automation_trigger
+
+action:
+  - service: media_player.select_source
+    target:
+      entity_id: !input source
+    data:
+      source: !input stream
+
+  - delay: "00:00:01"  # Small delay to ensure proper sequencing
+
+  - repeat:
+      for_each: !input zones
+      sequence:
+        - service: media_player.select_source
+          target:
+            entity_id: "{{ repeat.item }}"
+          data:
+            source: !input source

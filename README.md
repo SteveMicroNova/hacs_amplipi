@@ -38,7 +38,13 @@ The AmpliPi Media Player entities support:
 - PA
 
 ## Optional Setup
-This component has an optional companion component that can be found at https://github.com/micro-nova/AmpliPi-HomeAssistant-Card if you wish to use home assistant as a ui for your AmpliPi software. You can install that by first installing the [MiniMediaPlayer](https://github.com/kalkih/mini-media-player) component which can be found by searching for it in the HACS searchbar, and then following the same installation guide as this component but replacing the repository link with https://github.com/micro-nova/AmpliPi-HomeAssistant-Card and with type "Dashboard"
+1. Automation Blueprints:
+    This repo contains a number of blueprints to make automations easier, but they have to be imported manually. Click this button to do so:
+    [![Import Blueprint](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?external_url=https://github.com/SteveMicroNova/hacs_amplipi/tree/main/custom_components/amplipi/blueprints/start_streaming/start_streaming.yaml)
+
+ 
+2. AmpliPi Cards:
+    This component has an optional companion component that can be found at https://github.com/micro-nova/AmpliPi-HomeAssistant-Card if you wish to use home assistant as a ui for your AmpliPi software. You can install that by first installing the [MiniMediaPlayer](https://github.com/kalkih/mini-media-player) component which can be found by searching for it in the HACS searchbar, and then following the same installation guide as this component but replacing the repository link with https://github.com/micro-nova/AmpliPi-HomeAssistant-Card and with type "Dashboard"
 
 ## Credits
 

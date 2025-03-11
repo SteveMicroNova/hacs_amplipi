@@ -108,26 +108,6 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
 
     async_add_entities(sources + zones + groups + announcer)
 
-    async def handle_set_audio_routing(call):
-        source = call.data["source"]
-        stream = call.data["stream"]
-        zone = call.data["zone"]
-
-        media_player = hass.states.get(source)
-        if not media_player:
-            raise ValueError(f"Media player {source} not found")
-
-        await hass.services.async_call("media_player", "select_source", {
-            "entity_id": stream,
-            "source": source
-        })
-
-        await hass.services.async_call("media_player", "select_source", {
-            "entity_id": source,
-            "source": zone
-        })
-    hass.services.async_register("AmpliPi", "set_audio_routing", handle_set_audio_routing)
-
 
 async def async_remove_entry(hass, entry) -> None:
     pass
