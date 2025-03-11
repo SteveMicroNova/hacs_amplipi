@@ -52,7 +52,7 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 def copy_blueprints(hass: HomeAssistant):
     """Recursively copy all blueprints from the integration directory to Home Assistant's blueprints folder."""
     source_dir = os.path.join(os.path.dirname(__file__), "blueprints", "automation")
-    dest_dir = os.path.join(hass.config.path("blueprints/automation/SteveMicroNova"))
+    dest_dir = os.path.join(hass.config.path("blueprints/automation/hacs_amplipi"))
 
     if not os.path.exists(source_dir):
         return
