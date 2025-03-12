@@ -1,5 +1,5 @@
 blueprint:
-  name: "Home Audio Connection"
+  name: "AmpliPi Start Streaming"
   description: "Connect a Source to a Stream and assign Zone(s) to the Source."
   domain: automation
   input:
@@ -9,12 +9,14 @@ blueprint:
       selector:
         entity:
           domain: media_player
+          multiple: false
     stream:
       name: "Stream"
       description: "Select the audio stream."
       selector:
         entity:
           domain: media_player
+          multiple: false
     zones:
       name: "Zones"
       description: "Select one or more zones for audio output."
@@ -22,6 +24,11 @@ blueprint:
         entity:
           domain: media_player
           multiple: true
+variables:
+  amplipi_sources: >
+    {{ states.media_player | selectattr('attributes.amplipi_type', 'eq', 'source') | map(attribute='entity_id') | list }}
+  amplipi_zones: >
+    {{ states.media_player | selectattr('attributes.amplipi_type', 'eq', 'zone') | map(attribute='entity_id') | list }}
 
 mode: single
 
