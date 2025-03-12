@@ -1,9 +1,3 @@
-variables:
-  amplipi_sources: >
-    {{ states.media_player | selectattr('attributes._amplipi_type', 'eq', 'source') | map(attribute='entity_id') | list }}
-  amplipi_zones: >
-    {{ states.media_player | selectattr('attributes._amplipi_type', 'eq', 'zone') | map(attribute='entity_id') | list }}
-
 blueprint:
   name: "AmpliPi Start Streaming"
   description: "Connect a Source to a Stream and assign Zone(s) to the Source."
@@ -15,7 +9,7 @@ blueprint:
       selector:
         entity:
           domain: media_player
-          included_entities: "{{ trigger.entity_id in amplipi_sources }}"
+          include_entities: "{{ states('sensor.amplipi_sources').split(',') }}"
           multiple: false
     stream:
       name: "Stream"
@@ -30,7 +24,7 @@ blueprint:
       selector:
         entity:
           domain: media_player
-          included_entities: "{{ trigger.entity_id in amplipi_zones }}"
+          include_entities: "{{ states('sensor.amplipi_zones').split(',') }}"
           multiple: true
 
 mode: single
@@ -43,7 +37,7 @@ action:
   - choose:
       - conditions:
           - condition: template
-            value_template: "{{ trigger.entity_id in amplipi_sources }}"
+            value_template: "{{ trigger.entity_id in states('sensor.amplipi_sources').split(',') }}"
         sequence:
           - service: media_player.select_source
             target:
@@ -59,7 +53,7 @@ action:
         - choose:
             - conditions:
                 - condition: template
-                  value_template: "{{ repeat.item in amplipi_zones }}"
+                  value_template: "{{ repeat.item in states('sensor.amplipi_zones').split(',') }}"
               sequence:
                 - service: media_player.select_source
                   target:

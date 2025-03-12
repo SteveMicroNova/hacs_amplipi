@@ -1,0 +1,17 @@
+template:
+  - sensor:
+      - name: "AmpliPi Sources"
+        unique_id: amplipi_sources
+        state: >-
+          {{ states.media_player 
+             | selectattr('attributes._amplipi_type', 'eq', 'source') 
+             | map(attribute='entity_id') 
+             | list | join(",") }}
+
+      - name: "AmpliPi Zones"
+        unique_id: amplipi_zones
+        state: >-
+          {{ states.media_player 
+             | selectattr('attributes._amplipi_type', 'eq', 'zone') 
+             | map(attribute='entity_id') 
+             | list | join(",") }}
