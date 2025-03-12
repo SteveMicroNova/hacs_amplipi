@@ -24,6 +24,7 @@ blueprint:
         entity:
           domain: media_player
           multiple: true
+
 variables:
   amplipi_sources: >
     {{ states.media_player | selectattr('attributes.amplipi_type', 'eq', 'source') | map(attribute='entity_id') | list }}
@@ -34,29 +35,7 @@ mode: single
 
 trigger:
   - platform: state
-    event_type: automation_trigger
-
-action:
-  - service: media_player.select_source
-    target:
-      entity_id: "{{ trigger.entity_id in amplipi_sources }}"
-    data:
-      source: !input stream
-
-  - delay: "00:00:01"  # Small delay to ensure proper sequencing
-
-  - repeat:
-      for_each: !input zones
-      sequence:
-        - service: media_player.select_source
-          target:
-            entity_id: "{{ repeat.item }}"
-          data:
-            source: !input source
-
-trigger:
-  platform: state
-  entity_id: !input source
+    entity_id: !input source
 
 action:
   - choose:
@@ -70,13 +49,18 @@ action:
             data:
               source: !input stream
 
-  - choose:
-      - conditions:
-          - condition: template
-            value_template: "{{ trigger.entity_id in amplipi_zones }}"
-        sequence:
-          - service: media_player.select_source
-            target:
-              entity_id: !input zones
-            data:
-              source: !input source
+  - delay: "00:00:01"
+
+  - repeat:
+      for_each: !input zones
+      sequence:
+        - choose:
+            - conditions:
+                - condition: template
+                  value_template: "{{ repeat.item in amplipi_zones }}"
+              sequence:
+                - service: media_player.select_source
+                  target:
+                    entity_id: "{{ repeat.item }}"
+                  data:
+                    source: !input source
