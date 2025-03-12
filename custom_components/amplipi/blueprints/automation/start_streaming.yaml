@@ -53,7 +53,7 @@ action:
             entity_id: "{{ repeat.item }}"
           data:
             source: !input source
-            
+
 trigger:
   platform: state
   entity_id: !input source
@@ -77,6 +77,6 @@ action:
         sequence:
           - service: media_player.select_source
             target:
-              entity_id: !input zone
+              entity_id: !input zones
             data:
               source: !input source
