@@ -14,12 +14,11 @@ from .const import DOMAIN, AMPLIPI_OBJECT, CONF_VENDOR, CONF_VERSION, CONF_WEBAP
 
 PLATFORMS = ["media_player", "sensor"]
 
-SENSOR_FILE = os.path.join(os.path.dirname(__file__), "sensors.yaml")
-
 def load_sensors():
     """Load sensors from sensors.yaml."""
-    if os.path.exists(SENSOR_FILE):
-        with open(SENSOR_FILE, "r") as file:
+    sensor_file = os.path.join(os.path.dirname(__file__), "sensors.yaml")
+    if os.path.exists(sensor_file):
+        with open(sensor_file, "r") as file:
             return yaml.safe_load(file)
     return []
 
@@ -45,7 +44,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     # Copy all blueprints to Home Assistant's blueprints directory
     await hass.async_add_executor_job(copy_blueprints, hass)
 
-    await hass.async_add_executor_job(load_sensors, hass)
+    hass.data[DOMAIN]["sensors"] = load_sensors()
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
