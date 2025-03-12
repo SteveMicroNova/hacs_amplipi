@@ -27,9 +27,9 @@ blueprint:
 
 variables:
   amplipi_sources: >
-    {{ states.media_player | selectattr('attributes.amplipi_type', 'eq', 'source') | map(attribute='entity_id') | list }}
+    {{ states.media_player | selectattr('attributes._amplipi_type', 'eq', 'source') | map(attribute='entity_id') | list }}
   amplipi_zones: >
-    {{ states.media_player | selectattr('attributes.amplipi_type', 'eq', 'zone') | map(attribute='entity_id') | list }}
+    {{ states.media_player | selectattr('attributes._amplipi_type', 'eq', 'zone') | map(attribute='entity_id') | list }}
 
 mode: single
 
