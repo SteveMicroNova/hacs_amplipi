@@ -546,7 +546,6 @@ class AmpliPiZone(MediaPlayerEntity):
                  streams: List[Stream], sources: List[Source],
                  vendor: str, version: str, image_base_path: str,
                  client: AmpliPi):
-        self._amplipi_type = "zone"
         self._current_source = None
         self._sources = sources
         self._is_group = group is not None
@@ -576,7 +575,7 @@ class AmpliPiZone(MediaPlayerEntity):
             'Source 4',
         ]
         self._available = False
-        self._extra_attributes = []
+        self._extra_attributes = [{"amplipi_type": "zone"}]
         self._attr_device_class = MediaPlayerDeviceClass.SPEAKER
 
     async def async_turn_off(self):
