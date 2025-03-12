@@ -61,11 +61,10 @@ def copy_blueprints(hass: HomeAssistant):
 
     for root, _, files in os.walk(source_dir):
         for file in files:
-            if file.endswith(".yaml"):  # Ensure only YAML files are copied
+            if file.endswith(".yaml"):
                 src_path = os.path.join(root, file)
-                rel_path = os.path.relpath(src_path, source_dir)  # Preserve subdirectory structure if needed
+                rel_path = os.path.relpath(src_path, source_dir)
                 dest_path = os.path.join(dest_dir, rel_path)
 
-                if not os.path.exists(dest_path):  # Avoid overwriting user-modified files
-                    os.makedirs(os.path.dirname(dest_path), exist_ok=True)
-                    shutil.copy(src_path, dest_path)
+                os.makedirs(os.path.dirname(dest_path), exist_ok=True)
+                shutil.copy(src_path, dest_path)
