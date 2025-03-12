@@ -1,0 +1,15 @@
+set_audio_routing:
+  description: "Sets the audio source and output zone for AmpliPi"
+  fields:
+    stream:
+      description: "The stream to play"
+      required: true
+      example: "Groove Salad"
+    source:
+      description: "The audio source to select"
+      required: true
+      example: "Source 1"
+    destination:
+      description: "The zone(s) and/or group(s) for playback"
+      required: true
+      example: "Kitchen"
