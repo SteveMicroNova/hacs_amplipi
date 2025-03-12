@@ -2,6 +2,7 @@
 from __future__ import annotations
 import os
 import shutil
+import yaml
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_HOST, CONF_PORT, CONF_NAME, CONF_ID
@@ -11,7 +12,16 @@ from pyamplipi.amplipi import AmpliPi
 
 from .const import DOMAIN, AMPLIPI_OBJECT, CONF_VENDOR, CONF_VERSION, CONF_WEBAPP, CONF_API_PATH
 
-PLATFORMS = ["media_player"]
+PLATFORMS = ["media_player", "sensor"]
+
+SENSOR_FILE = os.path.join(os.path.dirname(__file__), "sensors.yaml")
+
+def load_sensors():
+    """Load sensors from sensors.yaml."""
+    if os.path.exists(SENSOR_FILE):
+        with open(SENSOR_FILE, "r") as file:
+            return yaml.safe_load(file)
+    return []
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up AmpliPi from a config entry and ensure blueprints are installed."""
