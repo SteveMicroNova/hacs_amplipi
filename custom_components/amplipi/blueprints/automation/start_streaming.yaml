@@ -33,13 +33,13 @@ variables:
 mode: single
 
 trigger:
-  - platform: event
+  - platform: state
     event_type: automation_trigger
 
 action:
   - service: media_player.select_source
     target:
-      entity_id: !input source
+      entity_id: "{{ trigger.entity_id in amplipi_sources }}"
     data:
       source: !input stream
 
@@ -53,3 +53,30 @@ action:
             entity_id: "{{ repeat.item }}"
           data:
             source: !input source
+            
+trigger:
+  platform: state
+  entity_id: !input source
+
+action:
+  - choose:
+      - conditions:
+          - condition: template
+            value_template: "{{ trigger.entity_id in amplipi_sources }}"
+        sequence:
+          - service: media_player.select_source
+            target:
+              entity_id: !input source
+            data:
+              source: !input stream
+
+  - choose:
+      - conditions:
+          - condition: template
+            value_template: "{{ trigger.entity_id in amplipi_zones }}"
+        sequence:
+          - service: media_player.select_source
+            target:
+              entity_id: !input zone
+            data:
+              source: !input source
