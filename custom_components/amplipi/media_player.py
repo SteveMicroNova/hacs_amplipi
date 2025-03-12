@@ -137,7 +137,6 @@ class AmpliPiSource(MediaPlayerEntity):
         self._unique_id = f"{namespace}_source_{source.id}"
         self._last_update_successful = False
         self._attr_device_class = MediaPlayerDeviceClass.SPEAKER
-        self._amplipi_type = "source"
 
 
     async def async_turn_off(self):
@@ -512,7 +511,8 @@ class AmpliPiSource(MediaPlayerEntity):
         for zone in self._zones:
             zone_list.append(zone.id)
         return {"amplipi_source_id" : self._id,
-                "amplipi_source_zones" : zone_list}
+                "amplipi_source_zones" : zone_list,
+                "amplipi_type": "source"}
 
 class AmpliPiZone(MediaPlayerEntity):
     """Representation of an AmpliPi Zone and/or Group. Supports Audio volume
@@ -575,7 +575,7 @@ class AmpliPiZone(MediaPlayerEntity):
             'Source 4',
         ]
         self._available = False
-        self._extra_attributes = [{"amplipi_type": "zone"}]
+        self._extra_attributes = []
         self._attr_device_class = MediaPlayerDeviceClass.SPEAKER
 
     async def async_turn_off(self):
@@ -937,12 +937,12 @@ class AmpliPiZone(MediaPlayerEntity):
                 for state_zone in state.zones:
                     if state_zone.id == zone_id and not state_zone.disabled:
                         zone_ids.append(zone_id)
-            self._extra_attributes = {"amplipi_zones" : zone_ids}
+            self._extra_attributes = {"amplipi_zones" : zone_ids, "amplipi_type": "zone"}
 
             #if self._zone_num_cache != len(zone_ids):
                 #self.hass.bus.fire("group_change_event", {"group_change": True})
         else:
-            self._extra_attributes = {"amplipi_zone_id" : self._zone.id}
+            self._extra_attributes = {"amplipi_zone_id" : self._zone.id, "amplipi_type": "zone"}
 
     async def _update_available(self):
         state = await self._client.get_status()
