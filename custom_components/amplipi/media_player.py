@@ -357,8 +357,8 @@ class AmpliPiSource(MediaPlayerEntity):
 
     @property
     def name(self):
-        """Return the name of the zone."""
-        return "AmpliPi: " + self._name
+        """Return the name of the source"""
+        return "AmpliPi Source: " + self._name
 
     async def async_update(self):
         """Retrieve latest state."""
@@ -716,7 +716,10 @@ class AmpliPiZone(MediaPlayerEntity):
     @property
     def name(self):
         """Return the name of the zone."""
-        return "AmpliPi: " + self._name
+        if self.group:
+            return "AmpliPi Group: " + self._name
+        elif self.zone:
+            return "AmpliPi Zone: " + self._name
 
     async def async_update(self):
         """Retrieve latest state."""
@@ -1056,7 +1059,7 @@ class AmpliPiAnnouncer(MediaPlayerEntity):
     @property
     def name(self):
         """Return the name of the zone."""
-        return "AmpliPi: " + self._name
+        return "AmpliPi Announcement: " + self._name
 
     @property
     def state(self):

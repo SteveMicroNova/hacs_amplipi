@@ -5,7 +5,7 @@ template:
         state: >-
           {{ states.media_player 
              | selectattr('attributes.friendly_name', 'contains', 'AmpliPi')
-             | selectattr('entity_id', 'contains', 'source') 
+             | selectattr('attributes.friendly_name', 'contains', 'Source') 
              | map(attribute='entity_id') 
              | list | to_json }}
 
@@ -14,6 +14,6 @@ template:
         state: >-
           {{ states.media_player 
              | selectattr('attributes.friendly_name', 'contains', 'AmpliPi')
-             | selectattr('entity_id', 'contains', 'zone') 
+             | selectattr('attributes.friendly_name', 'contains', 'Zone' or 'Group') 
              | map(attribute='entity_id') 
              | list | to_json }}
