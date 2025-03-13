@@ -4,28 +4,17 @@ template:
         unique_id: amplipi_sources
         state: >-
           {{ states.media_player 
-             | selectattr('attributes.friendly_name', 'contains', 'AmpliPi')
-             | selectattr('attributes.friendly_name', 'contains', 'Source') 
-             | map(attribute='entity_id') 
-             | list | to_json }}
+            | selectattr('attributes.friendly_name', 'search', 'AmpliPi.*Source') 
+            | map(attribute='entity_id') | list }}
 
       - name: "AmpliPi Zones"
         unique_id: amplipi_zones
-        state: >-
           {{ states.media_player 
-             | selectattr('attributes.friendly_name', 'contains', 'AmpliPi')
-             | selectattr('attributes.friendly_name', 'contains', 'Zone') 
-             | map(attribute='entity_id') 
-             | list | to_json }}
-             
-      - name: "AmpliPi Groups"
-        unique_id: amplipi_groups
-        state: >-
-          {{ states.media_player 
-             | selectattr('attributes.friendly_name', 'contains', 'AmpliPi')
-             | selectattr('attributes.friendly_name', 'contains', 'Group') 
-             | map(attribute='entity_id') 
-             | list | to_json }}
+            | selectattr('attributes.friendly_name', 'search', 'AmpliPi.*Zone') 
+            | map(attribute='entity_id') | list +
+            states.media_player 
+            | selectattr('attributes.friendly_name', 'search', 'AmpliPi.*Group') 
+            | map(attribute='entity_id') | list }}
              
       - name: "AmpliPi Streams"
         unique_id: amplipi_streams
