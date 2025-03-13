@@ -716,9 +716,9 @@ class AmpliPiZone(MediaPlayerEntity):
     @property
     def name(self):
         """Return the name of the zone."""
-        if self.group:
+        if self._group:
             return "AmpliPi Group: " + self._name
-        elif self.zone:
+        elif self._zone:
             return "AmpliPi Zone: " + self._name
 
     async def async_update(self):
