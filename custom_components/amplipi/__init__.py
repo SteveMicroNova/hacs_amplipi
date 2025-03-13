@@ -44,7 +44,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     # Copy all blueprints to Home Assistant's blueprints directory
     await hass.async_add_executor_job(copy_blueprints, hass)
 
-    hass.data[DOMAIN]["sensors"] = load_sensors()
+    for sensor in load_sensors().get("sensor", {}):
+        hass.states.async_set(f"sensor.{sensor['name']}", sensor.get("state", "unknown"))
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
