@@ -4,14 +4,14 @@ template:
         unique_id: amplipi_sources
         state: >-
           {{ states.media_player 
-             | selectattr('attributes._amplipi_type', 'eq', 'source') 
+             | selectattr('attributes.amplipi_type', 'eq', 'source') 
              | map(attribute='entity_id') 
-             | list | join(",") }}
+             | list | to_json }}
 
       - name: "AmpliPi Zones"
         unique_id: amplipi_zones
         state: >-
           {{ states.media_player 
-             | selectattr('attributes._amplipi_type', 'eq', 'zone') 
+             | selectattr('attributes.amplipi_type', 'eq', 'zone') 
              | map(attribute='entity_id') 
-             | list | join(",") }}
+             | list | to_json }}
