@@ -26,3 +26,9 @@ template:
              | selectattr('attributes.friendly_name', 'contains', 'Group') 
              | map(attribute='entity_id') 
              | list | to_json }}
+             
+      - name: "AmpliPi Streams"
+        unique_id: amplipi_streams
+        state: >-
+          {{ state_attr('media_player.amplipi_source_1', 'source_list') }}
+

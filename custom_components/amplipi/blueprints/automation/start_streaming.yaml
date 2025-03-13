@@ -9,14 +9,18 @@ blueprint:
       selector:
         entity:
           domain: media_player
-          include_entities: "{{ states('sensor.amplipi_sources').split(',') }}"
+          include_entities: "{{ states.media_player 
+             | selectattr('attributes.friendly_name', 'contains', 'AmpliPi')
+             | selectattr('attributes.friendly_name', 'contains', 'Source') 
+             | map(attribute='entity_id') 
+             | list | to_json }}"
           multiple: false
     stream:
       name: "Stream"
       description: "Select the audio stream."
       selector:
-        entity:
-          domain: media_player
+        select:
+          options: "{{ state_attr('media_player.amplipi_source_1', 'source_list') | default([]) }}"
           multiple: false
     zones:
       name: "Zones"
@@ -24,7 +28,18 @@ blueprint:
       selector:
         entity:
           domain: media_player
-          include_entities: "{{ states('sensor.amplipi_zones') + states('sensor.amplipi_groups') }}"
+          include_entities: "{{ states.media_player 
+             | selectattr('attributes.friendly_name', 'contains', 'AmpliPi')
+             | selectattr('attributes.friendly_name', 'contains', 'Zone') 
+             | map(attribute='entity_id') 
+             | list | to_json
+           + 
+           states.media_player 
+             | selectattr('attributes.friendly_name', 'contains', 'AmpliPi')
+             | selectattr('attributes.friendly_name', 'contains', 'Group') 
+             | map(attribute='entity_id') 
+             | list | to_json }}
+             "
           multiple: true
 
 mode: single
