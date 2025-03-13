@@ -10,10 +10,8 @@ blueprint:
         entity:
           domain: media_player
           include_entities: "{{ states.media_player 
-             | selectattr('attributes.friendly_name', 'contains', 'AmpliPi')
-             | selectattr('attributes.friendly_name', 'contains', 'Source') 
-             | map(attribute='entity_id') 
-             | list | to_json }}"
+            | selectattr('attributes.friendly_name', 'search', 'AmpliPi.*Source') 
+            | map(attribute='entity_id') | list }}"
           multiple: false
     stream:
       name: "Stream"
@@ -29,17 +27,11 @@ blueprint:
         entity:
           domain: media_player
           include_entities: "{{ states.media_player 
-             | selectattr('attributes.friendly_name', 'contains', 'AmpliPi')
-             | selectattr('attributes.friendly_name', 'contains', 'Zone') 
-             | map(attribute='entity_id') 
-             | list | to_json
-           + 
-           states.media_player 
-             | selectattr('attributes.friendly_name', 'contains', 'AmpliPi')
-             | selectattr('attributes.friendly_name', 'contains', 'Group') 
-             | map(attribute='entity_id') 
-             | list | to_json }}
-             "
+            | selectattr('attributes.friendly_name', 'search', 'AmpliPi.*Zone') 
+            | map(attribute='entity_id') | list +
+            states.media_player 
+            | selectattr('attributes.friendly_name', 'search', 'AmpliPi.*Group') 
+            | map(attribute='entity_id') | list }}"
           multiple: true
 
 mode: single
@@ -49,29 +41,19 @@ trigger:
     entity_id: !input source
 
 action:
-  - choose:
-      - conditions:
-          - condition: template
-            value_template: "{{ trigger.entity_id in states('sensor.amplipi_sources').split(',') }}"
-        sequence:
-          - service: media_player.select_source
-            target:
-              entity_id: !input source
-            data:
-              source: !input stream
+  - service: media_player.select_source
+    target:
+      entity_id: !input source
+    data:
+      source: !input stream
 
   - delay: "00:00:01"
 
   - repeat:
       for_each: !input zones
       sequence:
-        - choose:
-            - conditions:
-                - condition: template
-                  value_template: "{{ repeat.item in states('sensor.amplipi_zones').split(',') }}"
-              sequence:
-                - service: media_player.select_source
-                  target:
-                    entity_id: "{{ repeat.item }}"
-                  data:
-                    source: !input source
+        - service: media_player.select_source
+          target:
+            entity_id: "{{ repeat.item }}"
+          data:
+            source: !input source
