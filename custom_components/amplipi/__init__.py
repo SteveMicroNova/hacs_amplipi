@@ -12,7 +12,7 @@ from pyamplipi.amplipi import AmpliPi
 
 from .const import DOMAIN, AMPLIPI_OBJECT, CONF_VENDOR, CONF_VERSION, CONF_WEBAPP, CONF_API_PATH
 
-PLATFORMS = ["media_player", "sensor"]
+PLATFORMS = ["media_player"]
 
 def load_sensors():
     """Load sensors from sensors.yaml."""
