@@ -490,6 +490,7 @@ class AmpliPiSource(MediaPlayerEntity):
     
     @property
     def amplipi_type(self):
+        """amplipi_type for entity classification by sensors"""
         return "source"
 
     async def _update_source(self, update: SourceUpdate):
@@ -933,6 +934,7 @@ class AmpliPiZone(MediaPlayerEntity):
     
     @property
     def amplipi_type(self):
+        """amplipi_type for entity classification by sensors"""
         return "zone"
 
     async def _get_extra_attributes(self):
