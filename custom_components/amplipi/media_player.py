@@ -487,6 +487,10 @@ class AmpliPiSource(MediaPlayerEntity):
         streams = ['None']
         streams += [stream.name for stream in self._streams if stream.id >= 1000 or stream.id - 996 == self._id]
         return streams
+    
+    @property
+    def amplipi_type(self):
+        return "source"
 
     async def _update_source(self, update: SourceUpdate):
         await self._client.set_source(self._source.id, update)
@@ -511,8 +515,7 @@ class AmpliPiSource(MediaPlayerEntity):
         for zone in self._zones:
             zone_list.append(zone.id)
         return {"amplipi_source_id" : self._id,
-                "amplipi_source_zones" : zone_list,
-                "amplipi_type": "source"}
+                "amplipi_source_zones" : zone_list}
 
 class AmpliPiZone(MediaPlayerEntity):
     """Representation of an AmpliPi Zone and/or Group. Supports Audio volume
@@ -927,6 +930,10 @@ class AmpliPiZone(MediaPlayerEntity):
     @property
     def extra_state_attributes(self):
         return self._extra_attributes
+    
+    @property
+    def amplipi_type(self):
+        return "zone"
 
     async def _get_extra_attributes(self):
         if self._is_group:
@@ -937,12 +944,12 @@ class AmpliPiZone(MediaPlayerEntity):
                 for state_zone in state.zones:
                     if state_zone.id == zone_id and not state_zone.disabled:
                         zone_ids.append(zone_id)
-            self._extra_attributes = {"amplipi_zones" : zone_ids, "amplipi_type": "zone"}
+            self._extra_attributes = {"amplipi_zones" : zone_ids}
 
             #if self._zone_num_cache != len(zone_ids):
                 #self.hass.bus.fire("group_change_event", {"group_change": True})
         else:
-            self._extra_attributes = {"amplipi_zone_id" : self._zone.id, "amplipi_type": "zone"}
+            self._extra_attributes = {"amplipi_zone_id" : self._zone.id}
 
     async def _update_available(self):
         state = await self._client.get_status()
