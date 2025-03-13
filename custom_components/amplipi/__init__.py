@@ -12,10 +12,47 @@ from pyamplipi.amplipi import AmpliPi
 
 from .const import DOMAIN, AMPLIPI_OBJECT, CONF_VENDOR, CONF_VERSION, CONF_WEBAPP, CONF_API_PATH
 
-PLATFORMS = ["media_player", "sensor"]
+PLATFORMS = ["media_player"]
+
+def install_sensors_yaml(hass: HomeAssistant):
+    """Ensure sensors.yaml is installed without overwriting user modifications."""
+    sensors_path = os.path.join(hass.config.path(), "sensors.yaml")
+    addon_sensors_path = os.path.join(os.path.dirname(__file__), "sensors.yaml")
+
+    if not os.path.exists(addon_sensors_path):
+        return
+
+    if os.path.exists(sensors_path):
+        # Merge with existing file (if any)
+        with open(sensors_path, "r") as user_file:
+            try:
+                user_config = yaml.safe_load(user_file) or {}
+            except yaml.YAMLError:
+                user_config = {}
+
+        with open(addon_sensors_path, "r") as addon_file:
+            try:
+                addon_config = yaml.safe_load(addon_file) or {}
+            except yaml.YAMLError:
+                addon_config = {}
+
+        # Merge sensor configurations safely
+        merged_config = user_config
+        if "template" in addon_config:
+            if "template" not in merged_config:
+                merged_config["template"] = []
+            merged_config["template"].extend(addon_config["template"])
+
+        with open(sensors_path, "w") as merged_file:
+            yaml.dump(merged_config, merged_file, default_flow_style=False)
+
+    else:
+        # If no existing file, copy it over
+        shutil.copy(addon_sensors_path, sensors_path)
+
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
-    """Set up AmpliPi from a config entry and ensure blueprints are installed."""
+    """Set up AmpliPi from a config entry and ensure sensors are installed."""
     
     hass.data.setdefault(DOMAIN, {})[entry.entry_id] = {
         AMPLIPI_OBJECT: AmpliPi(
@@ -32,6 +69,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         CONF_WEBAPP: entry.data[CONF_WEBAPP],
         CONF_API_PATH: entry.data[CONF_API_PATH],
     }
+
+    # Install sensors.yaml
+    await hass.async_add_executor_job(install_sensors_yaml, hass)
 
     # Copy all blueprints to Home Assistant's blueprints directory
     await hass.async_add_executor_job(copy_blueprints, hass)

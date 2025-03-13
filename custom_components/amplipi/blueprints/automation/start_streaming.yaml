@@ -9,22 +9,28 @@ blueprint:
       selector:
         entity:
           domain: media_player
-          include_entities: "{{ states('sensor.amplipi_sources') }}"
           multiple: false
+          filter:
+            - attributes:
+                friendly_name: "/AmpliPi.*Source/"
+
     stream:
       name: "Stream"
       description: "Select the audio stream."
       selector:
         select:
-        options: "{{ state_attr('media_player.amplipi_source_1', 'source_list') | default([]) }}"
+          options: "{{ state_attr('media_player.amplipi_source_1', 'source_list') | default([]) }}"
+
     zones:
       name: "Zones"
       description: "Select one or more zones for audio output."
       selector:
         entity:
           domain: media_player
-          include_entities: "{{ states('sensor.amplipi_zones') }}"
           multiple: true
+          filter:
+            - attributes:
+                friendly_name: "/AmpliPi.*(Zone|Group)/"
 
 mode: single
 
@@ -33,29 +39,19 @@ trigger:
     entity_id: !input source
 
 action:
-  - choose:
-      - conditions:
-          - condition: template
-            value_template: "{{ trigger.entity_id in states('sensor.amplipi_sources') }}"
-        sequence:
-          - service: media_player.select_source
-            target:
-              entity_id: !input source
-            data:
-              source: !input stream
+  - service: media_player.select_source
+    target:
+      entity_id: !input source
+    data:
+      source: !input stream
 
   - delay: "00:00:01"
 
   - repeat:
       for_each: !input zones
       sequence:
-        - choose:
-            - conditions:
-                - condition: template
-                  value_template: "{{ repeat.item in states('sensor.amplipi_zones') }}"
-              sequence:
-                - service: media_player.select_source
-                  target:
-                    entity_id: "{{ repeat.item }}"
-                  data:
-                    source: !input source
+        - service: media_player.select_source
+          target:
+            entity_id: "{{ repeat.item }}"
+          data:
+            source: !input source
