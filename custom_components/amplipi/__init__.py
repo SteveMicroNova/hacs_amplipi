@@ -12,15 +12,7 @@ from pyamplipi.amplipi import AmpliPi
 
 from .const import DOMAIN, AMPLIPI_OBJECT, CONF_VENDOR, CONF_VERSION, CONF_WEBAPP, CONF_API_PATH
 
-PLATFORMS = ["media_player"]
-
-def load_sensors():
-    """Load sensors from sensors.yaml."""
-    sensor_file = os.path.join(os.path.dirname(__file__), "sensors.yaml")
-    if os.path.exists(sensor_file):
-        with open(sensor_file, "r") as file:
-            return yaml.safe_load(file)
-    return []
+PLATFORMS = ["media_player", "sensor"]
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up AmpliPi from a config entry and ensure blueprints are installed."""
@@ -43,9 +35,6 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     # Copy all blueprints to Home Assistant's blueprints directory
     await hass.async_add_executor_job(copy_blueprints, hass)
-
-    for sensor in load_sensors().get("sensor", {}):
-        hass.states.async_set(f"sensor.{sensor['name']}", sensor.get("state", "unknown"))
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
