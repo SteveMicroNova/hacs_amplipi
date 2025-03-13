@@ -549,15 +549,10 @@ class AmpliPiZone(MediaPlayerEntity):
         self._sources = sources
         self._is_group = group is not None
 
-        if self._is_group:
-            self._id = group.id
-            self._name = group.name
-            self._unique_id = f"{namespace}_group_{self._id}"
-        else:
-            self._id = zone.id
-            self._name = zone.name
-            self._unique_id = f"{namespace}_zone_{self._id}"
-
+        self._id = group.id if self._is_group else zone.id
+        self._name = group.name if self._is_group else zone.name
+        self._unique_id = f"{namespace}_group_{self._id}" if self._is_group else f"{namespace}_zone_{self._id}"
+        
         self._streams = streams
         self._image_base_path = image_base_path
         self._vendor = vendor
