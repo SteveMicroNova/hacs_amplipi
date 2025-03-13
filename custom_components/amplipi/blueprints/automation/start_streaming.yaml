@@ -24,7 +24,7 @@ blueprint:
       selector:
         entity:
           domain: media_player
-          include_entities: "{{ states('sensor.amplipi_zones').split(',') }}"
+          include_entities: "{{ states('sensor.amplipi_zones') + states('sensor.amplipi_groups') }}"
           multiple: true
 
 mode: single

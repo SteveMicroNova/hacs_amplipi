@@ -14,6 +14,15 @@ template:
         state: >-
           {{ states.media_player 
              | selectattr('attributes.friendly_name', 'contains', 'AmpliPi')
-             | selectattr('attributes.friendly_name', 'contains', 'Zone' or 'Group') 
+             | selectattr('attributes.friendly_name', 'contains', 'Zone') 
+             | map(attribute='entity_id') 
+             | list | to_json }}
+             
+      - name: "AmpliPi Groups"
+        unique_id: amplipi_groups
+        state: >-
+          {{ states.media_player 
+             | selectattr('attributes.friendly_name', 'contains', 'AmpliPi')
+             | selectattr('attributes.friendly_name', 'contains', 'Group') 
              | map(attribute='entity_id') 
              | list | to_json }}
