@@ -78,6 +78,13 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
+    hass.components.persistent_notification.create(
+    "AmpliPi sensors installed! Please ensure your `configuration.yaml` includes:\n\n"
+    "```yaml\nsensor: !include sensors.yaml\n```",
+    title="AmpliPi Integration",
+    notification_id="amplipi_sensors",
+    )
+
     return True
 
 
