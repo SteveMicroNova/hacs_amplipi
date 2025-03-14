@@ -19,5 +19,6 @@ sensor:
   - name: "AmpliPi Streams"
     unique_id: amplipi_streams
     state: >-
-      {{ state_attr('media_player.amplipi_source_1', 'source_list') | to_json }}
+      {% set sources = states('sensor.amplipi_sources') | from_json %}
+      {{ state_attr(sources[0], 'source_list') | to_json if sources else '[]' }}
 
