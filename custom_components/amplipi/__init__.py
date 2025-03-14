@@ -3,6 +3,7 @@ from __future__ import annotations
 import os
 import shutil
 import yaml
+import json
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_HOST, CONF_PORT, CONF_NAME, CONF_ID
@@ -15,16 +16,19 @@ from .const import DOMAIN, AMPLIPI_OBJECT, CONF_VENDOR, CONF_VERSION, CONF_WEBAP
 PLATFORMS = ["media_player"]
 
 def install_sensors_yaml(hass: HomeAssistant):
-    """Ensure sensors.yaml is installed without overwriting user modifications."""
-    sensors_path = os.path.join(hass.config.path(), "sensors.yaml")
-    addon_sensors_path = os.path.join(os.path.dirname(__file__), "sensors.yaml")
+    """Ensure hacs_amplipi_sensors.yaml is installed without overwriting user modifications."""
+    sensors_install_dir = os.path.join(os.path.dirname(__file__), "sensors")
+    sensors_source_path = os.path.join(hass.config.path(), "hacs_amplipi_sensors.yaml")
+    if not os.path.exists(sensors_install_dir):
+        os.mkdir()
+    addon_sensors_path = os.path.join(sensors_install_dir, "hacs_amplipi_sensors.yaml")
 
     if not os.path.exists(addon_sensors_path):
         return
 
-    if os.path.exists(sensors_path):
+    if os.path.exists(sensors_source_path):
         # Merge with existing file (if any)
-        with open(sensors_path, "r") as user_file:
+        with open(sensors_source_path, "r") as user_file:
             try:
                 user_config = yaml.safe_load(user_file) or {}
             except yaml.YAMLError:
@@ -43,12 +47,12 @@ def install_sensors_yaml(hass: HomeAssistant):
                 merged_config["template"] = []
             merged_config["template"].extend(addon_config["template"])
 
-        with open(sensors_path, "w") as merged_file:
+        with open(sensors_source_path, "w") as merged_file:
             yaml.dump(merged_config, merged_file, default_flow_style=False)
 
     else:
         # If no existing file, copy it over
-        shutil.copy(addon_sensors_path, sensors_path)
+        shutil.copy(addon_sensors_path, sensors_source_path)
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
@@ -70,7 +74,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         CONF_API_PATH: entry.data[CONF_API_PATH],
     }
 
-    # Install sensors.yaml
+    # Install hacs_amplipi_sensors.yaml
     await hass.async_add_executor_job(install_sensors_yaml, hass)
 
     # Copy all blueprints to Home Assistant's blueprints directory
@@ -78,12 +82,21 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
-    hass.components.persistent_notification.create(
-    "AmpliPi sensors installed! Please ensure your `configuration.yaml` includes:\n\n"
-    "```yaml\nsensor: !include sensors.yaml\n```",
-    title="AmpliPi Integration",
-    notification_id="amplipi_sensors",
-    )
+    storage_file = hass.config.path(".storage", "amplipi_notification_shown")
+
+    # Check if the notification was already shown
+    if not os.path.exists(storage_file):
+        hass.components.persistent_notification.create(
+        "AmpliPi sensors installed! Please ensure your `configuration.yaml` includes:\n\n"
+        "```yaml\ntemplate: !include_dir_list sensors/\n\n```"
+        "to make use of the automation blueprint that makes connecting sources and streams easier\n",
+        title="AmpliPi Integration",
+        notification_id="amplipi_sensors",
+        )
+
+        # Mark notification as shown
+        async with hass.async_add_executor_job(open, storage_file, "w") as f:
+            json.dump({"shown": True}, f)
 
     return True
 
