@@ -20,7 +20,7 @@ def install_sensors_yaml(hass: HomeAssistant):
     sensors_install_dir = os.path.join(os.path.dirname(__file__), "sensors")
     sensors_source_path = os.path.join(hass.config.path(), "hacs_amplipi_sensors.yaml")
     if not os.path.exists(sensors_install_dir):
-        os.mkdir()
+        os.mkdir(sensors_install_dir)
     addon_sensors_path = os.path.join(sensors_install_dir, "hacs_amplipi_sensors.yaml")
 
     if not os.path.exists(addon_sensors_path):
