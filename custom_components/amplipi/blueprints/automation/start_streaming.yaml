@@ -11,26 +11,23 @@ blueprint:
       name: "Source"
       description: "Select the source"
       selector:
-        entity:
-          domain: media_player
-          multiple: false
-          options: sources
+        select:
+          options: "{{ sources }}"
 
     stream:
       name: "Stream"
       description: "Select the audio stream."
       selector:
         select:
-          options: streams
+          options: "{{ streams }}"
 
     zones:
       name: "Zones"
       description: "Select one or more zones for audio output."
       selector:
-        entity:
-          domain: media_player
-          multiple: false
-          options: zones
+        select:
+          multiple: true
+          options: "{{ zones }}"
 
 mode: single
 
