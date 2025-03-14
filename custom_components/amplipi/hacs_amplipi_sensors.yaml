@@ -4,21 +4,21 @@ sensor:
     state: >-
       {{ states.media_player 
         | selectattr('attributes.friendly_name', 'search', 'AmpliPi.*Source') 
-        | map(attribute='entity_id') | list |to_json }}
+        | map(attribute='entity_id') | list }}
 
   - name: "AmpliPi Zones"
     unique_id: amplipi_zones
     state: >-
-      {{ ( states.media_player 
+      {{ states.media_player 
         | selectattr('attributes.friendly_name', 'search', 'AmpliPi.*Zone') 
         | map(attribute='entity_id') | list +
         states.media_player 
         | selectattr('attributes.friendly_name', 'search', 'AmpliPi.*Group') 
-        | map(attribute='entity_id') | list ) | to_json }}
+        | map(attribute='entity_id') | list }}
  
   - name: "AmpliPi Streams"
     unique_id: amplipi_streams
     state: >-
       {% set sources = states('sensor.amplipi_sources') | from_json %}
-      {{ state_attr(sources[0], 'source_list') | to_json if sources else '[]' }}
+      {{ state_attr(sources[0], 'source_list') }}
 
