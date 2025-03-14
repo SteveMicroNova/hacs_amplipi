@@ -3,9 +3,9 @@ blueprint:
   description: "Connect a Source to a Stream and assign Zone(s) to the Source."
   domain: automation
   variables:
-    sources: "{{ states('sensor.amplipi_sources') }}"
-    streams: "{{ states('sensor.amplipi_streams') }}"
-    zones: "{{ states('sensor.amplipi_zones') }}"
+    - sources: "{{ states('sensor.amplipi_sources') }}"
+    - streams: "{{ states('sensor.amplipi_streams') }}"
+    - zones: "{{ states('sensor.amplipi_zones') }}"
   input:
     source:
       name: "Source"
