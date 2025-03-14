@@ -18,7 +18,7 @@ PLATFORMS = ["media_player"]
 def install_sensors_yaml(hass: HomeAssistant):
     """Ensure hacs_amplipi_sensors.yaml is installed without overwriting user modifications."""
     sensors_install_dir = os.path.join(hass.config.path(), "sensors")
-    sensors_source_path = os.path.join(os.path.dirname(__file__), "hacs_amplipi_sensors.yaml")
+    sensors_source_path = os.path.join(hass.config.path(), "hacs_amplipi_sensors.yaml")
     if not os.path.exists(sensors_install_dir):
         os.mkdir(sensors_install_dir)
     addon_sensors_path = os.path.join(sensors_install_dir, "hacs_amplipi_sensors.yaml")
