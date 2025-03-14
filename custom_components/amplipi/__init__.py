@@ -18,41 +18,11 @@ PLATFORMS = ["media_player"]
 def install_sensors_yaml(hass: HomeAssistant):
     """Ensure hacs_amplipi_sensors.yaml is installed without overwriting user modifications."""
     sensors_install_dir = os.path.join(hass.config.path(), "sensors")
-    sensors_source_path = os.path.join(hass.config.path(), "hacs_amplipi_sensors.yaml")
+    sensors_source_path = os.path.join(os.path.dirname(__file__), "hacs_amplipi_sensors.yaml")
     if not os.path.exists(sensors_install_dir):
         os.mkdir(sensors_install_dir)
-    addon_sensors_path = os.path.join(sensors_install_dir, "hacs_amplipi_sensors.yaml")
 
-    if not os.path.exists(addon_sensors_path):
-        return
-
-    if os.path.exists(sensors_source_path):
-        # Merge with existing file (if any)
-        with open(sensors_source_path, "r") as user_file:
-            try:
-                user_config = yaml.safe_load(user_file) or {}
-            except yaml.YAMLError:
-                user_config = {}
-
-        with open(addon_sensors_path, "r") as addon_file:
-            try:
-                addon_config = yaml.safe_load(addon_file) or {}
-            except yaml.YAMLError:
-                addon_config = {}
-
-        # Merge sensor configurations safely
-        merged_config = user_config
-        if "template" in addon_config:
-            if "template" not in merged_config:
-                merged_config["template"] = []
-            merged_config["template"].extend(addon_config["template"])
-
-        with open(sensors_source_path, "w") as merged_file:
-            yaml.dump(merged_config, merged_file, default_flow_style=False)
-
-    else:
-        # If no existing file, copy it over
-        shutil.copy(addon_sensors_path, sensors_source_path)
+    shutil.copy(sensors_source_path, os.path.join(sensors_install_dir, "hacs_amplipi_sensors.yaml"))
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
