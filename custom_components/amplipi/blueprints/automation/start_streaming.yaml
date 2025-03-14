@@ -10,16 +10,14 @@ blueprint:
         entity:
           domain: media_player
           multiple: false
-          filter:
-            - attributes:
-                friendly_name: "/AmpliPi.*Source/"
+          options: "{{ states('sensor.amplipi_sources') }}"
 
     stream:
       name: "Stream"
       description: "Select the audio stream."
       selector:
         select:
-          options: "{{ state_attr('media_player.amplipi_source_1', 'source_list') | default([]) }}"
+          options: "{{ states('sensor.amplipi_streams') }}"
 
     zones:
       name: "Zones"
@@ -27,10 +25,8 @@ blueprint:
       selector:
         entity:
           domain: media_player
-          multiple: true
-          filter:
-            - attributes:
-                friendly_name: "/AmpliPi.*(Zone|Group)/"
+          multiple: false
+          options: "{{ states('sensor.amplipi_zones') }}"
 
 mode: single
 
