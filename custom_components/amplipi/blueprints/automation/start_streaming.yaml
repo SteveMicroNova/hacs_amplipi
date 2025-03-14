@@ -2,24 +2,20 @@ blueprint:
   name: "AmpliPi Start Streaming"
   description: "Connect a Source to a Stream and assign Zone(s) to the Source."
   domain: automation
-  variables:
-    sources: "{{ state_attr('sensor.amplipi_sources', 'options') }}"
-    streams: "{{ state_attr('sensor.amplipi_streams', 'options') }}"
-    zones: "{{ state_attr('sensor.amplipi_zones', 'options') }}"
   input:
     source:
       name: "Source"
       description: "Select the source"
       selector:
         select:
-          options: "{{ sources }}"
+          options: "{{ state_attr('sensor.amplipi_sources', 'options') }}"
 
     stream:
       name: "Stream"
       description: "Select the audio stream."
       selector:
         select:
-          options: "{{ streams }}"
+          options: "{{ state_attr('sensor.amplipi_streams', 'options') }}"
 
     zones:
       name: "Zones"
@@ -27,7 +23,7 @@ blueprint:
       selector:
         select:
           multiple: true
-          options: "{{ zones }}"
+          options: "{{ state_attr('sensor.amplipi_zones', 'options') }}"
 
 mode: single
 
