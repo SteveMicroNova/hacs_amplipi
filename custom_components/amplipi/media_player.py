@@ -136,7 +136,7 @@ class AmpliPiSource(MediaPlayerEntity):
         self._client = client
         self._unique_id = f"{namespace}_source_{source.id}"
         self._last_update_successful = False
-        self._attr_device_class = MediaPlayerDeviceClass.SPEAKER
+        self._attr_device_class = MediaPlayerDeviceClass.RECEIVER
 
 
     async def async_turn_off(self):
