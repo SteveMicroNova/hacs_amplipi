@@ -30,7 +30,6 @@ blueprint:
             - domain: media_player
             - device_class: speaker
             - integration: AmpliPi
-            - supported_features: 
           multiple: true
 
 mode: single
