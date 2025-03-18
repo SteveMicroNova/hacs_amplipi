@@ -1105,6 +1105,7 @@ class AmpliPiStream(MediaPlayerEntity):
                  sources: List[Source],
                  vendor: str, version: str, image_base_path: str,
                  client: AmpliPi):
+        self._stream = stream
         self._current_source = None
         self._sources = sources
 
