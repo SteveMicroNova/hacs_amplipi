@@ -1251,10 +1251,16 @@ class AmpliPiStream(MediaPlayerEntity):
 
         try:
             state = await self._client.get_status()
-            stream = next(filter(lambda z: z.id == self._id, state.streams), None)
-            if self._current_source  is not None:
+            stream = next(filter(lambda s: s.id == self._id, state.streams), None)
+            _LOGGER.warning('Stream output:')
+            _LOGGER.warning(stream)
+            if self._current_source is not None:
                 groups = next(filter(lambda g: g.source_id == self._current_source.id , state.groups), None)
+                _LOGGER.warning('Groups output:')
+                _LOGGER.warning(groups)
                 zones = next(filter(lambda z: z.source_id == self._current_source.id , state.zones), None)
+                _LOGGER.warning('Zones output:')
+                _LOGGER.warning(zones)
         except Exception as e:
             self._last_update_successful = False
             _LOGGER.error(f'Could not update stream {self._id} due to error:')
