@@ -1252,8 +1252,8 @@ class AmpliPiStream(MediaPlayerEntity):
         try:
             state = await self._client.get_status()
             stream = next(filter(lambda z: z.id == self._id, state.streams), None)
-            groups = next(filter(lambda g: g.source_id == self._current_source.id , self._current_groups), None)
-            zones = next(filter(lambda z: z.source_id == self._current_source.id , self._current_zones), None)
+            groups = next(filter(lambda g: g.source_id == self._current_source.id , state.groups), None)
+            zones = next(filter(lambda z: z.source_id == self._current_source.id , state.zones), None)
         except Exception as e:
             self._last_update_successful = False
             _LOGGER.error(f'Could not update stream {self._id} due to error:')
