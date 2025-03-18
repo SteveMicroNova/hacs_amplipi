@@ -1252,8 +1252,8 @@ class AmpliPiStream(MediaPlayerEntity):
             _LOGGER.warning(f'Got stream {self._id} from status output')
         except Exception as e:
             self._last_update_successful = False
-            _LOGGER.warning(f'Got status of stream {self._id}')
-            _LOGGER.warning(f"Error: {e}")
+            _LOGGER.error(f'Could not update stream {self._id} due to error:')
+            _LOGGER.error(e)
             return
 
         await self._get_extra_attributes()
