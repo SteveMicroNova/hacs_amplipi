@@ -1317,10 +1317,10 @@ class AmpliPiStream(MediaPlayerEntity):
 
 
     @property
-    def volume_level(self):
+    async def volume_level(self):
         """Volume level of the media player (0..1)."""
         if self._current_source is not None:
-            state = self._client.get_status()
+            state = await self._client.get_status()
             groups = next(filter(lambda g: g.source_id == self._current_source.id , state.groups), None)
             zones = next(filter(lambda z: z.source_id == self._current_source.id , state.zones), None)
 
@@ -1334,10 +1334,10 @@ class AmpliPiStream(MediaPlayerEntity):
         return STATE_UNKNOWN
 
     @property
-    def is_volume_muted(self) -> bool:
+    async def is_volume_muted(self) -> bool:
         """Boolean if volume is currently muted."""
         if self._current_source is not None:
-            state = self._client.get_status()
+            await state = self._client.get_status()
             groups = next(filter(lambda g: g.source_id == self._current_source.id , state.groups), None)
             zones = next(filter(lambda z: z.source_id == self._current_source.id , state.zones), None)
 
