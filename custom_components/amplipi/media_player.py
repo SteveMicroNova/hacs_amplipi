@@ -752,7 +752,7 @@ class AmpliPiZone(MediaPlayerEntity):
             streams = state.streams
         except Exception:
             self._last_update_successful = False
-            _LOGGER.error(f'Could not update source {self._id}')
+            _LOGGER.error(f'Could not update {"group" if self._is_group else "zone"} {self._id}')
             return
 
         await self._get_extra_attributes()
@@ -1248,7 +1248,7 @@ class AmpliPiStream(MediaPlayerEntity):
 
         try:
             state = await self._client.get_status()
-            stream = next(filter(lambda z: z.id == self._id, state.streams), None)
+            stream = next(filter(lambda z: z.id == self._stream.id, state.streams), None)
             enabled = not stream.disabled
         except Exception:
             self._last_update_successful = False
