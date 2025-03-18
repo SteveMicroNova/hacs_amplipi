@@ -10,7 +10,6 @@ blueprint:
       selector:
         entity:
           filter:
-            - domain: media_player
             - device_class: receiver
             - integration: AmpliPi
 
@@ -18,8 +17,10 @@ blueprint:
       name: "Stream"
       description: "Select the audio stream."
       selector:
-        attribute:
-          entity_id: media_player.amplipi_source_1.amplipi_streams
+        entity:
+          filter:
+            - device_class: null
+            - integration: AmpliPi
 
     zones:
       name: "Zones"
@@ -27,7 +28,6 @@ blueprint:
       selector:
         entity:
           filter:
-            - domain: media_player
             - device_class: speaker
             - integration: AmpliPi
           multiple: true
