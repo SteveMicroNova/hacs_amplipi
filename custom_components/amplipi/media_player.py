@@ -1164,27 +1164,13 @@ class AmpliPiStream(MediaPlayerEntity):
     async def async_set_volume_level(self, volume):
         if volume is None:
             return
-        
-        if self._is_group and self._group is not None:
-            self._group.vol_f = volume
-        elif self._zone is not None:
-            self._zone.vol_f = volume
-    
-        _LOGGER.info(f"setting volume to {volume}")
-        if self._is_group:
-            await self._update_group(
-                MultiZoneUpdate(
-                    groups=[self._group.id],
-                    update=ZoneUpdate(
-                        vol_f=volume
-                    )
+        await self._update_zones(
+            MultiZoneUpdate(
+                update=ZoneUpdate(
+                    vol_f=volume
                 )
             )
-        else:
-            await self._update_zone(ZoneUpdate(
-                vol_f=volume
-            ))
-
+        )
 
     async def async_volume_up(self):
         if hasattr(self, "volume_up"):
