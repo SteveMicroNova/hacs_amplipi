@@ -15,18 +15,8 @@ from .const import DOMAIN, AMPLIPI_OBJECT, CONF_VENDOR, CONF_VERSION, CONF_WEBAP
 
 PLATFORMS = ["media_player"]
 
-def install_sensors_yaml(hass: HomeAssistant):
-    """Ensure hacs_amplipi_sensors.yaml is installed without overwriting user modifications."""
-    sensors_install_dir = os.path.join(hass.config.path(), "sensors")
-    sensors_source_path = os.path.join(os.path.dirname(__file__), "hacs_amplipi_sensors.yaml")
-    if not os.path.exists(sensors_install_dir):
-        os.mkdir(sensors_install_dir)
-
-    shutil.copy(sensors_source_path, os.path.join(sensors_install_dir, "hacs_amplipi_sensors.yaml"))
-
-
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
-    """Set up AmpliPi from a config entry and ensure sensors are installed."""
+    """Set up AmpliPi from a config entry and ensure blueprints are installed."""
     
     hass.data.setdefault(DOMAIN, {})[entry.entry_id] = {
         AMPLIPI_OBJECT: AmpliPi(
@@ -44,29 +34,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         CONF_API_PATH: entry.data[CONF_API_PATH],
     }
 
-    # Install hacs_amplipi_sensors.yaml
-    await hass.async_add_executor_job(install_sensors_yaml, hass)
-
     # Copy all blueprints to Home Assistant's blueprints directory
     await hass.async_add_executor_job(copy_blueprints, hass)
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
-
-    storage_file = hass.config.path(".storage", "amplipi_notification_shown")
-
-    # Check if the notification was already shown
-    if not os.path.exists(storage_file):
-        hass.components.persistent_notification.create(
-        "AmpliPi sensors installed! Please ensure your `configuration.yaml` includes:\n\n"
-        "```yaml\ntemplate: !include_dir_list sensors/\n```"
-        "to make use of the automation blueprint that makes connecting sources and streams easier\n",
-        title="AmpliPi Integration",
-        notification_id="amplipi_sensors",
-        )
-
-        # Mark notification as shown
-        async with hass.async_add_executor_job(open, storage_file, "w") as f:
-            json.dump({"shown": True}, f)
 
     return True
 
