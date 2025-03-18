@@ -1115,7 +1115,6 @@ class AmpliPiStream(MediaPlayerEntity):
         self._image_base_path = image_base_path
         self._vendor = vendor
         self._version = version
-        self._enabled = False
         self._client = client
         self._last_update_successful = False
         self._attr_source_list = [
@@ -1251,8 +1250,6 @@ class AmpliPiStream(MediaPlayerEntity):
             _LOGGER.warning(f'Got status with stream {self._id}')
             stream = next(filter(lambda z: z.id == self._id, state.streams), None)
             _LOGGER.warning(f'Got stream {self._id} from status output')
-            enabled = not stream.disabled
-            _LOGGER.warning(f'Stream {self._id} enabled is {enabled}')
         except Exception:
             self._last_update_successful = False
             _LOGGER.error(f'Could not update stream {self._id}')
@@ -1260,14 +1257,13 @@ class AmpliPiStream(MediaPlayerEntity):
 
         await self._get_extra_attributes()
         self._available = await self._update_available()
-        self.sync_state(stream, state.sources, enabled)
+        self.sync_state(stream, state.sources)
 
 
-    def sync_state(self, stream: Stream, sources: List[Source], enabled: bool):
+    def sync_state(self, stream: Stream, sources: List[Source]):
         self._stream = stream
         self._sources = sources
         self._last_update_successful = True
-        self._enabled = enabled
 
         info = None
         self._current_source = None
