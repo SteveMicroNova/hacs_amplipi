@@ -1269,7 +1269,8 @@ class AmpliPiStream(MediaPlayerEntity):
         info = None
         self._current_source = None
 
-        self._current_source = next(filter(lambda s: self._stream.source_id == s.id, sources), None)
+        if self._stream.source_id is not None:
+            self._current_source = next(filter(lambda s: self._stream.source_id == s.id, sources), None)
 
         if self._current_source is not None:
             info = self._current_source.info
