@@ -1107,6 +1107,8 @@ class AmpliPiStream(MediaPlayerEntity):
                  client: AmpliPi):
         self._stream = stream
         self._current_source = None
+        self._current_zones = None
+        self._current_groups = None
         self._sources = sources
 
         self._id = stream.id
@@ -1244,11 +1246,14 @@ class AmpliPiStream(MediaPlayerEntity):
         """Retrieve latest state."""
         _LOGGER.info(f'Retrieving state for stream {self._id}')
         stream = None
-        enabled = False
+        groups = None
+        zones = None
 
         try:
             state = await self._client.get_status()
             stream = next(filter(lambda z: z.id == self._id, state.streams), None)
+            groups = next(filter(lambda g: g.source_id == self._current_source.id , self._current_groups), None)
+            zones = next(filter(lambda z: z.source_id == self._current_source.id , self._current_zones), None)
         except Exception as e:
             self._last_update_successful = False
             _LOGGER.error(f'Could not update stream {self._id} due to error:')
@@ -1257,13 +1262,15 @@ class AmpliPiStream(MediaPlayerEntity):
 
         await self._get_extra_attributes()
         self._available = await self._update_available()
-        self.sync_state(stream, state.sources, enabled)
+        self.sync_state(stream, state.sources, zones, groups)
 
 
-    def sync_state(self, stream: Stream, sources: List[Source], enabled: bool):
+    def sync_state(self, stream: Stream, sources: List[Source], zones, groups):
         self._stream = stream
         self._sources = sources
         self._last_update_successful = True
+        self._current_zones = zones
+        self._current_groups = groups
 
         info = None
         self._current_source = None
@@ -1317,15 +1324,12 @@ class AmpliPiStream(MediaPlayerEntity):
 
 
     @property
-    async def volume_level(self):
+    def volume_level(self):
         """Volume level of the media player (0..1)."""
         if self._current_source is not None:
-            state = await self._client.get_status()
-            groups = next(filter(lambda g: g.source_id == self._current_source.id , state.groups), None)
-            zones = next(filter(lambda z: z.source_id == self._current_source.id , state.zones), None)
 
-            group = next(filter(lambda z: z.vol_f is not None, groups), None)
-            zone = next(filter(lambda z: z.vol_f is not None, zones), None)
+            group = next(filter(lambda z: z.vol_f is not None, self._current_groups), None)
+            zone = next(filter(lambda z: z.vol_f is not None, self._current_zones), None)
 
             if group is not None:
                 return group.vol_f
@@ -1334,15 +1338,11 @@ class AmpliPiStream(MediaPlayerEntity):
         return STATE_UNKNOWN
 
     @property
-    async def is_volume_muted(self) -> bool:
+    def is_volume_muted(self) -> bool:
         """Boolean if volume is currently muted."""
         if self._current_source is not None:
-            await state = self._client.get_status()
-            groups = next(filter(lambda g: g.source_id == self._current_source.id , state.groups), None)
-            zones = next(filter(lambda z: z.source_id == self._current_source.id , state.zones), None)
-
-            group = next(filter(lambda z: z.mute is not None, groups), None)
-            zone = next(filter(lambda z: z.mute is not None, zones), None)
+            group = next(filter(lambda z: z.mute is not None, self._current_groups), None)
+            zone = next(filter(lambda z: z.mute is not None, self._current_zones), None)
 
             if group is not None:
                 return group.mute
