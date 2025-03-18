@@ -1319,32 +1319,35 @@ class AmpliPiStream(MediaPlayerEntity):
     @property
     def volume_level(self):
         """Volume level of the media player (0..1)."""
-        # if self._source.vol_delta is None:
-        groups = self._sources[self._current_source.id].groups
-        zones = self._sources[self._current_source.id].zones
+        if self._current_source is not None:
+            state = self._client.get_status()
+            groups = next(filter(lambda g: g.source_id == self._current_source.id , state.groups), None)
+            zones = next(filter(lambda z: z.source_id == self._current_source.id , state.zones), None)
 
-        group = next(filter(lambda z: z.vol_f is not None, groups), None)
-        zone = next(filter(lambda z: z.vol_f is not None, zones), None)
+            group = next(filter(lambda z: z.vol_f is not None, groups), None)
+            zone = next(filter(lambda z: z.vol_f is not None, zones), None)
 
-        if group is not None:
-            return group.vol_f
-        elif zone is not None:
-            return zone.vol_f
+            if group is not None:
+                return group.vol_f
+            elif zone is not None:
+                return zone.vol_f
         return STATE_UNKNOWN
 
     @property
     def is_volume_muted(self) -> bool:
         """Boolean if volume is currently muted."""
-        groups = self._sources[self._current_source.id].groups
-        zones = self._sources[self._current_source.id].zones
+        if self._current_source is not None:
+            state = self._client.get_status()
+            groups = next(filter(lambda g: g.source_id == self._current_source.id , state.groups), None)
+            zones = next(filter(lambda z: z.source_id == self._current_source.id , state.zones), None)
 
-        group = next(filter(lambda z: z.mute is not None, groups), None)
-        zone = next(filter(lambda z: z.mute is not None, zones), None)
+            group = next(filter(lambda z: z.mute is not None, groups), None)
+            zone = next(filter(lambda z: z.mute is not None, zones), None)
 
-        if group is not None:
-            return group.mute
-        elif zone is not None:
-            return zone.mute
+            if group is not None:
+                return group.mute
+            elif zone is not None:
+                return zone.mute
         return STATE_UNKNOWN
 
     async def async_select_source(self, source):
