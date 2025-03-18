@@ -1434,7 +1434,8 @@ class AmpliPiStream(MediaPlayerEntity):
 
     async def _update_available(self):
         await self._client.get_status()
-        if self._stream is None or self._stream.disabled or self._current_source is None:
+        #  or self._stream.disabled
+        if self._stream is None or self._current_source is None:
             return False
         return True
 
