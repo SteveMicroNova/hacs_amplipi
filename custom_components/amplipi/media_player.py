@@ -1337,7 +1337,7 @@ class AmpliPiStream(MediaPlayerEntity):
             group = None
             zone = None
             if self._current_groups is not None:
-                group = next(filter(lambda z: z.vol_f is not None, self._current_groups), None)
+                group = next(filter(lambda g: g.vol_f is not None, self._current_groups), None)
             if self._current_zones is not None:
                 zone = next(filter(lambda z: z.vol_f is not None, self._current_zones), None)
 
@@ -1361,7 +1361,6 @@ class AmpliPiStream(MediaPlayerEntity):
         return STATE_UNKNOWN
 
     async def async_select_source(self, source):
-        source_id = int(source.split(' ')[1]) - 1
         self._selected_source = source
         await self._update_source(
             SourceUpdate(
