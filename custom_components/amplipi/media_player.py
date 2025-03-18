@@ -1325,8 +1325,8 @@ class AmpliPiStream(MediaPlayerEntity):
     def volume_level(self):
         """Volume level of the media player (0..1)."""
         # if self._source.vol_delta is None:
-        groups = self._sources[self._current_source - 1].groups
-        zones = self._sources[self._current_source - 1].zones
+        groups = self._sources[self._current_source.id].groups
+        zones = self._sources[self._current_source.id].zones
 
         group = next(filter(lambda z: z.vol_f is not None, groups), None)
         zone = next(filter(lambda z: z.vol_f is not None, zones), None)
@@ -1340,8 +1340,8 @@ class AmpliPiStream(MediaPlayerEntity):
     @property
     def is_volume_muted(self) -> bool:
         """Boolean if volume is currently muted."""
-        groups = self._sources[self._current_source - 1].groups
-        zones = self._sources[self._current_source - 1].zones
+        groups = self._sources[self._current_source.id].groups
+        zones = self._sources[self._current_source.id].zones
 
         group = next(filter(lambda z: z.mute is not None, groups), None)
         zone = next(filter(lambda z: z.mute is not None, zones), None)
