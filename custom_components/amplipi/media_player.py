@@ -1251,7 +1251,7 @@ class AmpliPiStream(MediaPlayerEntity):
             stream = next(filter(lambda z: z.id == self._id, state.streams), None)
             _LOGGER.warning("stream is:")
             _LOGGER.warning(stream)
-            enabled = not stream.disabled
+            # enabled = not stream.disabled
         except Exception as e:
             self._last_update_successful = False
             _LOGGER.error(f'Could not update stream {self._id} due to error:')
