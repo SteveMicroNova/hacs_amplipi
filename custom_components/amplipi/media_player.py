@@ -1335,10 +1335,6 @@ class AmpliPiStream(MediaPlayerEntity):
         """Volume level of the media player (0..1)."""
         if self._current_source is not None:
 
-            _LOGGER.warning("self._current_groups content:")
-            _LOGGER.warning(self._current_groups)
-            _LOGGER.warning(self._current_groups[1])
-
             group = None
             if self._current_groups is not None:
                 group = next(filter(lambda g: g.vol_f is not None, self._current_groups), None)
@@ -1351,6 +1347,7 @@ class AmpliPiStream(MediaPlayerEntity):
                 return group.vol_f
             elif zone is not None:
                 return zone.vol_f
+            
         return STATE_UNKNOWN
 
     @property
