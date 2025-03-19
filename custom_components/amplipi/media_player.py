@@ -1258,9 +1258,13 @@ class AmpliPiStream(MediaPlayerEntity):
                 groups = next(filter(lambda g: g.source_id == self._current_source.id , state.groups), None)
                 _LOGGER.warning('Groups output:')
                 _LOGGER.warning(groups)
-                zones = next(filter(lambda z: z.source_id == self._current_source.id , state.zones), None)
+                _LOGGER.warning('Groups type:')
+                _LOGGER.warning(type(groups))
+                zones = next(filter(lambda z: z.source_id == self._current_source.id, state.zones), None)
                 _LOGGER.warning('Zones output:')
                 _LOGGER.warning(zones)
+                _LOGGER.warning('Zones type:')
+                _LOGGER.warning(type(zones))
         except Exception as e:
             self._last_update_successful = False
             _LOGGER.error(f'Could not update stream {self._id} due to error:')
@@ -1337,11 +1341,11 @@ class AmpliPiStream(MediaPlayerEntity):
 
             group = None
             if self._current_groups is not None:
-                group = next(filter(lambda g: g["vol_f"] is not None, self._current_groups), None)
+                group = next(filter(lambda g: g.vol_f is not None, self._current_groups), None)
 
             zone = None
             if self._current_zones is not None:
-                zone = next(filter(lambda z: z["vol_f"] is not None, self._current_zones), None)
+                zone = next(filter(lambda z: z.vol_f is not None, self._current_zones), None)
 
             if group is not None:
                 return group["vol_f"]
