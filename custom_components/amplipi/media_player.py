@@ -1113,7 +1113,7 @@ class AmpliPiStream(MediaPlayerEntity):
 
         self._id = stream.id
         self._name = stream.name
-        self._unique_id = f"{namespace}_stream_{stream.id}"
+        self._unique_id = f"{namespace}_{stream.type}_stream_{stream.id}"
         
         self._image_base_path = image_base_path
         self._vendor = vendor
@@ -1249,7 +1249,7 @@ class AmpliPiStream(MediaPlayerEntity):
     @property
     def name(self):
         """Return the name of the stream."""
-        return "AmpliPi Stream: " + self._name
+        return f"AmpliPi {self._stream.type} Stream: {self._name}"
 
     async def async_update(self):
         """Retrieve latest state."""
