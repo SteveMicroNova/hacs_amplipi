@@ -1361,9 +1361,10 @@ class AmpliPiStream(MediaPlayerEntity):
         return STATE_UNKNOWN
 
     async def async_select_source(self, source):
-        self._selected_source = source
+        source_id = int(source.split(' ')[1]) - 1
+        self._current_source = source
         await self._update_source(
-            source.id,
+            source_id,
             SourceUpdate(
                 input=f'stream={self._id}'
             )
