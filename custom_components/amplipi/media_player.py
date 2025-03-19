@@ -1098,7 +1098,7 @@ class AmpliPiStream(MediaPlayerEntity):
         """Polling needed."""
         return True
 
-    async def async_turn_on(self):
+    async def async_turn_on(self): # I would like for this to be supported, but I cannot figure out how yet
         await self.find_source()
 
     def __init__(self, namespace: str, stream,
@@ -1141,10 +1141,6 @@ class AmpliPiStream(MediaPlayerEntity):
             await self.async_update()
 
     async def async_turn_off(self):
-        """
-        Disconnects stream from all sources.
-        Due to the function of STATE_OFF, also checks if the state should be turning on and calls async_turn_on in that case.
-        """
         if self._current_source is not None:
             _LOGGER.info(f"Disconnecting stream from source {self._current_source}")
             await self._update_source(
@@ -1153,8 +1149,6 @@ class AmpliPiStream(MediaPlayerEntity):
                     input='None'
                 )
             )
-        else:
-            await self.async_turn_on()
 
     async def async_mute_volume(self, mute):
         if mute is None:
