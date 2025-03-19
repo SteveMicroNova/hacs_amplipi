@@ -1154,7 +1154,7 @@ class AmpliPiStream(MediaPlayerEntity):
                 )
             )
         else:
-            self.async_turn_on()
+            await self.async_turn_on()
 
     async def async_mute_volume(self, mute):
         if mute is None:
