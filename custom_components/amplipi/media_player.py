@@ -1308,7 +1308,7 @@ class AmpliPiStream(MediaPlayerEntity):
         """Return the state of the zone."""
         if self._last_update_successful is False:
             return STATE_UNKNOWN
-        elif self._current_source is None or self._current_source == -1 or self._current_source.info is None or self._current_source.info.state is None:
+        elif self._current_source is None or self._current_source.id == -1 or self._current_source.info is None or self._current_source.info.state is None:
             return STATE_IDLE
         elif self._current_source.info.state in (
                 'paused'
@@ -1349,14 +1349,13 @@ class AmpliPiStream(MediaPlayerEntity):
     def is_volume_muted(self) -> bool:
         """Boolean if volume is currently muted."""
         if self._current_source is not None:
-            if len(self._current_groups) > 0:
-                group = next(filter(lambda z: z.mute is not None, self._current_groups), None)
-            if len(self._current_zones) > 0:
-                zone = next(filter(lambda z: z.mute is not None, self._current_zones), None)
 
+            group = next(filter(lambda z: z.mute is not None, self._current_groups), None)
             if group is not None:
                 return group.mute
-            elif zone is not None:
+            
+            zone = next(filter(lambda z: z.mute is not None, self._current_zones), None)
+            if zone is not None:
                 return zone.mute
         return STATE_UNKNOWN
 
