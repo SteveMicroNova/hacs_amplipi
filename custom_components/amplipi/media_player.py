@@ -1306,33 +1306,25 @@ class AmpliPiStream(MediaPlayerEntity):
     def state(self):
         """Return the state of the zone."""
         if self._last_update_successful is False:
-            _LOGGER.warning(f"State of Stream {self._stream.name}: UNKNOWN")
             return STATE_UNKNOWN
         elif self._current_source is None or self._current_source.id == -1 or self._current_source.info is None or self._current_source.info.state is None:
-            _LOGGER.warning(f"State of Stream {self._stream.name}: IDLE")
             return STATE_IDLE
         elif self._current_source.info.state in (
                 'paused'
         ):
-            _LOGGER.warning(f"State of Stream {self._stream.name}: PAUSED")
             return STATE_PAUSED
         elif self._current_source.info.state in (
                 'playing'
         ):
-            _LOGGER.warning(f"State of Stream {self._stream.name}: PLAYING")
             return STATE_PLAYING
         elif self._current_source.info.state in (
                 'stopped'
         ):
-            _LOGGER.warning(f"State of Stream {self._stream.name}: IDLE")
             return STATE_IDLE
         elif self._current_source.info.state in (
                 'stopped'
         ):
-            _LOGGER.warning(f"State of Stream {self._stream.name}: IDLE")
             return STATE_IDLE
-
-        _LOGGER.warning(f"State of Stream {self._stream.name}: IDLE")
         return STATE_IDLE
 
 
@@ -1349,7 +1341,7 @@ class AmpliPiStream(MediaPlayerEntity):
             if zone is not None:
                 return zone.vol_f
             
-        return STATE_UNKNOWN
+        return 0.5
 
     @property
     def is_volume_muted(self) -> bool:
@@ -1363,7 +1355,7 @@ class AmpliPiStream(MediaPlayerEntity):
             zone = next(filter(lambda z: z.mute is not None, self._current_zones), None)
             if zone is not None:
                 return zone.mute
-        return STATE_UNKNOWN
+        return True
 
     async def async_select_source(self, source):
         source_id = int(source.split(' ')[1]) - 1

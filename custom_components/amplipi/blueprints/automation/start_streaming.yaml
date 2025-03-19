@@ -20,9 +20,6 @@ blueprint:
         entity:
           filter:
             - integration: AmpliPi
-          exclude_entitites:
-            - source
-            - zones
 
     zones:
       name: "Zones"
