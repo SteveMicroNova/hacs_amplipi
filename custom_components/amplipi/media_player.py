@@ -1335,17 +1335,12 @@ class AmpliPiStream(MediaPlayerEntity):
         """Volume level of the media player (0..1)."""
         if self._current_source is not None:
 
-            group = None
-            if len(self._current_groups) > 0:
-                group = next(filter(lambda g: g.vol_f is not None, self._current_groups), None)
-
-            zone = None
-            if len(self._current_zones) > 0:
-                zone = next(filter(lambda z: z.vol_f is not None, self._current_zones), None)
-
+            group = next(filter(lambda g: g.vol_f is not None, self._current_groups), None)
             if group is not None:
                 return group.vol_f
-            elif zone is not None:
+
+            zone = next(filter(lambda z: z.vol_f is not None, self._current_zones), None)
+            if zone is not None:
                 return zone.vol_f
             
         return STATE_UNKNOWN
