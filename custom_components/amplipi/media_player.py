@@ -1129,8 +1129,8 @@ class AmpliPiStream(MediaPlayerEntity):
         self._available = False
         self._extra_attributes = []
 
-    async def _update_source(self, update: SourceUpdate):
-        await self._client.set_source(self._current_source, update)
+    async def _update_source(self, source_id, update: SourceUpdate):
+        await self._client.set_source(source_id, update)
         await self.async_update()
 
     async def _update_zones(self, update: MultiZoneUpdate):
@@ -1144,6 +1144,7 @@ class AmpliPiStream(MediaPlayerEntity):
         if self._current_source is not None:
             _LOGGER.info(f"Disconnecting stream from source {self._current_source}")
             await self._update_source(
+                self._current_source.id,
                 SourceUpdate(
                     input='stream=-1'
                 )
@@ -1362,6 +1363,7 @@ class AmpliPiStream(MediaPlayerEntity):
     async def async_select_source(self, source):
         self._selected_source = source
         await self._update_source(
+            source.id,
             SourceUpdate(
                 input=f'stream={self._id}'
             )
