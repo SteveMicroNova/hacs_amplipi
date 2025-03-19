@@ -1146,7 +1146,7 @@ class AmpliPiStream(MediaPlayerEntity):
             await self._update_source(
                 self._current_source.id,
                 SourceUpdate(
-                    input='stream=-1'
+                    input='None'
                 )
             )
 
@@ -1440,7 +1440,6 @@ class AmpliPiStream(MediaPlayerEntity):
             self._extra_attributes = {"amplipi_source_id" : None }
 
     async def _update_available(self):
-        await self._client.get_status()
         if self._stream is None:
             return False
         return True
