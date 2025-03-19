@@ -1310,26 +1310,33 @@ class AmpliPiStream(MediaPlayerEntity):
     def state(self):
         """Return the state of the zone."""
         if self._last_update_successful is False:
+            _LOGGER.warning(f"State of Stream {self._stream.name}: UNKNOWN")
             return STATE_UNKNOWN
         elif self._current_source is None or self._current_source.id == -1 or self._current_source.info is None or self._current_source.info.state is None:
+            _LOGGER.warning(f"State of Stream {self._stream.name}: IDLE")
             return STATE_IDLE
         elif self._current_source.info.state in (
                 'paused'
         ):
+            _LOGGER.warning(f"State of Stream {self._stream.name}: PAUSED")
             return STATE_PAUSED
         elif self._current_source.info.state in (
                 'playing'
         ):
+            _LOGGER.warning(f"State of Stream {self._stream.name}: PLAYING")
             return STATE_PLAYING
         elif self._current_source.info.state in (
                 'stopped'
         ):
+            _LOGGER.warning(f"State of Stream {self._stream.name}: IDLE")
             return STATE_IDLE
         elif self._current_source.info.state in (
                 'stopped'
         ):
+            _LOGGER.warning(f"State of Stream {self._stream.name}: IDLE")
             return STATE_IDLE
 
+        _LOGGER.warning(f"State of Stream {self._stream.name}: IDLE")
         return STATE_IDLE
 
 
