@@ -1252,8 +1252,7 @@ class AmpliPiStream(MediaPlayerEntity):
         try:
             state = await self._client.get_status()
             stream = next(filter(lambda s: s.id == self._id, state.streams), None)
-            _LOGGER.warning('Stream output:')
-            _LOGGER.warning(stream)
+            
             if self._current_source is not None:
                 for group in state.groups:
                     if group.source_id == self._current_source.id:
@@ -1349,9 +1348,9 @@ class AmpliPiStream(MediaPlayerEntity):
                 zone = next(filter(lambda z: z.vol_f is not None, self._current_zones), None)
 
             if group is not None:
-                return group["vol_f"]
+                return group.vol_f
             elif zone is not None:
-                return zone["vol_f"]
+                return zone.vol_f
         return STATE_UNKNOWN
 
     @property
