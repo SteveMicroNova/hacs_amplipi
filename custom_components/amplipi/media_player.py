@@ -1253,15 +1253,16 @@ class AmpliPiStream(MediaPlayerEntity):
         try:
             state = await self._client.get_status()
             stream = next(filter(lambda s: s.id == self._id, state.streams), None)
-            
-            if self._current_source is not None:
-                for group in state.groups:
-                    if group.source_id == self._current_source.id:
-                        groups.append(group)
-                        
-                for zone in state.zones:
-                    if zone.source_id == self._current_source.id:
-                        zones.append(zone)
+            if stream is not None:
+                current_source = next((s for s in state.sources if s.input == f"stream={stream.id}"), None)
+                if current_source is not None:
+                    for group in state.groups:
+                        if group.source_id == current_source.id:
+                            groups.append(group)
+
+                    for zone in state.zones:
+                        if zone.source_id == current_source.id:
+                            zones.append(zone)
         except Exception as e:
             self._last_update_successful = False
             _LOGGER.error(f'Could not update stream {self._id} due to error:')
@@ -1270,12 +1271,13 @@ class AmpliPiStream(MediaPlayerEntity):
 
         await self._get_extra_attributes()
         self._available = await self._update_available()
-        self.sync_state(stream, state.sources, zones, groups)
+        self.sync_state(stream, state.sources, current_source, zones, groups)
 
 
-    def sync_state(self, stream: Stream, sources: List[Source], zones, groups):
+    def sync_state(self, stream: Stream, sources: List[Source], current_source, zones, groups):
         self._stream = stream
         self._sources = sources
+        self._current_source = current_source
         self._last_update_successful = True
         self._current_zones = zones
         self._current_groups = groups
@@ -1362,7 +1364,7 @@ class AmpliPiStream(MediaPlayerEntity):
 
     async def async_select_source(self, source):
         source_id = int(source.split(' ')[1]) - 1
-        self._current_source = source
+        self._current_source = next((s for s in self._sources if s.id == source_id), self._current_source)
         await self._update_source(
             source_id,
             SourceUpdate(
