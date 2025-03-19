@@ -1306,7 +1306,7 @@ class AmpliPiStream(MediaPlayerEntity):
 
     @property
     def state(self):
-        """Return the state of the zone."""
+        """Return the state of the stream."""
         if self._last_update_successful is False:
             return STATE_UNKNOWN
         elif self._current_source is None or self._current_source.id == -1 or self._current_source.info is None or self._current_source.info.state is None:
@@ -1319,10 +1319,6 @@ class AmpliPiStream(MediaPlayerEntity):
                 'playing'
         ):
             return STATE_PLAYING
-        elif self._current_source.info.state in (
-                'stopped'
-        ):
-            return STATE_IDLE
         elif self._current_source.info.state in (
                 'stopped'
         ):
@@ -1438,11 +1434,14 @@ class AmpliPiStream(MediaPlayerEntity):
         return self._extra_attributes
 
     async def _get_extra_attributes(self):
-        self._extra_attributes = {"amplipi_source_id" : self._stream.id}
+        if self._current_source is not None:
+            self._extra_attributes = {"amplipi_source_id" : self._current_source.id }
+        else:
+            self._extra_attributes = {"amplipi_source_id" : None }
 
     async def _update_available(self):
         await self._client.get_status()
-        if self._stream is None or self._current_source is None:
+        if self._stream is None:
             return False
         return True
 
