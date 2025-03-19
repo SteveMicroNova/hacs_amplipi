@@ -19,8 +19,10 @@ blueprint:
       selector:
         entity:
           filter:
-            - device_class: null
             - integration: AmpliPi
+          exclude:
+            - device_class: receiver
+            - device_class: speaker
 
     zones:
       name: "Zones"
