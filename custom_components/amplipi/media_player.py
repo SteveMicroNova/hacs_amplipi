@@ -1249,7 +1249,7 @@ class AmpliPiStream(MediaPlayerEntity):
     @property
     def name(self):
         """Return the name of the stream."""
-        return f"AmpliPi {self._stream.type} Stream: {self._name}"
+        return f"AmpliPi Stream: {self._name}"
 
     async def async_update(self):
         """Retrieve latest state."""
