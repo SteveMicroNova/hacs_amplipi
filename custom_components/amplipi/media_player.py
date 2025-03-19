@@ -1341,7 +1341,7 @@ class AmpliPiStream(MediaPlayerEntity):
             if zone is not None:
                 return zone.vol_f
             
-        return 0.5
+        return None
 
     @property
     def is_volume_muted(self) -> bool:
