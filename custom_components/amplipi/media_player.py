@@ -1107,8 +1107,8 @@ class AmpliPiStream(MediaPlayerEntity):
                  client: AmpliPi):
         self._stream = stream
         self._current_source = None
-        self._current_zones = None
-        self._current_groups = None
+        self._current_zones = []
+        self._current_groups = []
         self._sources = sources
 
         self._id = stream.id
@@ -1336,11 +1336,11 @@ class AmpliPiStream(MediaPlayerEntity):
         if self._current_source is not None:
 
             group = None
-            if self._current_groups is not None:
+            if len(self._current_groups) > 0:
                 group = next(filter(lambda g: g.vol_f is not None, self._current_groups), None)
 
             zone = None
-            if self._current_zones is not None:
+            if len(self._current_zones) > 0:
                 zone = next(filter(lambda z: z.vol_f is not None, self._current_zones), None)
 
             if group is not None:
@@ -1354,8 +1354,10 @@ class AmpliPiStream(MediaPlayerEntity):
     def is_volume_muted(self) -> bool:
         """Boolean if volume is currently muted."""
         if self._current_source is not None:
-            group = next(filter(lambda z: z.mute is not None, self._current_groups), None)
-            zone = next(filter(lambda z: z.mute is not None, self._current_zones), None)
+            if len(self._current_groups) > 0:
+                group = next(filter(lambda z: z.mute is not None, self._current_groups), None)
+            if len(self._current_zones) > 0:
+                zone = next(filter(lambda z: z.mute is not None, self._current_zones), None)
 
             if group is not None:
                 return group.mute
