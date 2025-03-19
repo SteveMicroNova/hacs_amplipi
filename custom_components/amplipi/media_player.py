@@ -1169,6 +1169,8 @@ class AmpliPiStream(MediaPlayerEntity):
             return
         await self._update_zones(
             MultiZoneUpdate(
+                groups=self.current_groups,
+                zones=self._current_zones,
                 update=ZoneUpdate(
                     vol_f=volume
                 )
