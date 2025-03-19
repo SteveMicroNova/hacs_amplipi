@@ -10,7 +10,7 @@ from homeassistant.components.media_player import MediaPlayerDeviceClass, MediaP
 from homeassistant.components.media_player.browse_media import (
     async_process_play_media_url,
 )
-from homeassistant.const import CONF_NAME, STATE_PLAYING, STATE_PAUSED, STATE_IDLE, STATE_UNKNOWN
+from homeassistant.const import CONF_NAME, STATE_PLAYING, STATE_PAUSED, STATE_IDLE, STATE_UNKNOWN, STATE_OFF
 from homeassistant.helpers.entity import DeviceInfo
 from pyamplipi.amplipi import AmpliPi
 from pyamplipi.models import ZoneUpdate, Source, SourceUpdate, GroupUpdate, Stream, Group, Zone, Announcement, \
@@ -804,7 +804,7 @@ class AmpliPiZone(MediaPlayerEntity):
         if self._last_update_successful is False:
             return STATE_UNKNOWN
         elif self._current_source is None or self._current_source == -1 or self._current_source.info is None or self._current_source.info.state is None:
-            return STATE_IDLE
+            return STATE_OFF
         elif self._current_source.info.state in (
                 'paused'
         ):
