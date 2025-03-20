@@ -105,11 +105,10 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
     # If you update this, you must also update stream naming conventions in AmpliPiSource.process_stream() and AmpliPiStream.unique_id naming conventions
     streams = []
     for stream in status.streams:
-        stream_type = stream.type
-        stream_type = stream_type[0].upper()
+        # capitalize the first letter of the domain and stream type to make things look nicer on the frontend
+        stream_type = stream.type[0].upper() + stream.type[1:]
 
-        namespace = DOMAIN
-        namespace = namespace[0].upper()
+        namespace = DOMAIN[0].upper() + DOMAIN[1:]
         stream.name = f"{namespace} {stream_type} Stream: {stream.name}"
         streams.append(stream)
 
