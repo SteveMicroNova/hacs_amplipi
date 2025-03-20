@@ -1,6 +1,7 @@
 """Support for interfacing with the AmpliPi Multizone home audio controller."""
 import logging
 import operator
+import re
 from functools import reduce
 from typing import List
 
@@ -99,34 +100,21 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
 
     status = await amplipi.get_status()
 
-    # Stream names are processed to differentiate same-named streams by stream type
-    # This helps support default AmpliPi 1 + AmpliPi 2 spotify and airplay streams
-    # Without this processing, you always select the default spotify streams when trying to select airplay streams
-    # If you update this, you must also update stream naming conventions in AmpliPiSource.process_stream() and AmpliPiStream.unique_id naming conventions
-    streams = []
-    for stream in status.streams:
-        # capitalize the first letter of the domain and stream type to make things look nicer on the frontend
-        stream_type = stream.type[0].upper() + stream.type[1:]
-
-        namespace = DOMAIN[0].upper() + DOMAIN[1:]
-        stream.name = f"{namespace} {stream_type} Stream: {stream.name}"
-        streams.append(stream)
-
     sources: list[MediaPlayerEntity] = [
-        AmpliPiSource(DOMAIN, source, streams, vendor, version, image_base_path, amplipi)
+        AmpliPiSource(DOMAIN, source, status.streams, vendor, version, image_base_path, amplipi)
         for source in status.sources]
 
     zones: list[MediaPlayerEntity] = [
-        AmpliPiZone(DOMAIN, zone, None, streams, status.sources, vendor, version, image_base_path, amplipi)
+        AmpliPiZone(DOMAIN, zone, None, status.streams, status.sources, vendor, version, image_base_path, amplipi)
         for zone in status.zones]
 
     groups: list[MediaPlayerEntity] = [
-        AmpliPiZone(DOMAIN, None, group, streams, status.sources, vendor, version, image_base_path, amplipi)
+        AmpliPiZone(DOMAIN, None, group, status.streams, status.sources, vendor, version, image_base_path, amplipi)
         for group in status.groups]
     
     streams: list[MediaPlayerEntity] = [
         AmpliPiStream(DOMAIN, stream, status.sources, vendor, version, image_base_path, amplipi)
-        for stream in streams
+        for stream in status.streams
     ]
     
     announcer: list[MediaPlayerEntity] = [
@@ -150,7 +138,17 @@ class AmpliPiSource(MediaPlayerEntity):
 
     def __init__(self, namespace: str, source: Source, streams: List[Stream], vendor: str, version: str,
                  image_base_path: str, client: AmpliPi):
-        self._streams = streams
+        
+        # Stream names are processed to differentiate same-named streams by stream id
+        # This helps support default AmpliPi 1 + AmpliPi 2 spotify and airplay streams
+        # Without this processing, you always select the default spotify streams when trying to select airplay streams
+        # If you update this, you must also update stream naming conventions in AmpliPiSource.process_stream() and AmpliPiStream.unique_id naming conventions
+        processed_streams = []
+        for stream in streams:
+            stream.name = f"AmpliPi Stream {stream.id}: {stream.name}"
+            processed_streams.append(stream)
+
+        self._streams = processed_streams
         self._id = source.id
         self._current_stream = None
         self._image_base_path = image_base_path
@@ -283,10 +281,13 @@ class AmpliPiSource(MediaPlayerEntity):
     def process_stream(self, stream: str):
         """converts stream names and ids to the same string for use with attaching a name to a face during async_select_source"""
         # If you update this, you must also update stream naming conventions in both AmpliPiStream.__init__ and async_setup_entry
-        ret = str(stream)
-        ret = ret.replace("_", " ")
-        ret = ret.strip(":")
-        return ret.lower()
+        processed = ''.join(re.findall(r'\d', stream))
+        if processed[0] == 1:
+            return processed[:4]
+        elif processed[0] == 9:
+            return processed[:3]
+        else:
+            _LOGGER.error("AmpliPiSource.process_stream() could not determine stream ID")
 
     async def async_select_source(self, source):
 
@@ -1145,7 +1146,7 @@ class AmpliPiStream(MediaPlayerEntity):
 
         # If you update this, you must also update stream naming conventions AmpliPiSource.process_stream() and async_setup_entry
         self._name = stream.name
-        self._unique_id = f"{namespace}_{stream.type}_stream_{stream.name}".lower()
+        self._unique_id = f"{namespace}_stream_{stream.id}_{stream.name}"
         
         self._image_base_path = image_base_path
         self._vendor = vendor
@@ -1276,7 +1277,7 @@ class AmpliPiStream(MediaPlayerEntity):
     @property
     def name(self):
         """Return the name of the stream."""
-        return {self._name}
+        return f"AmpliPi Stream {self._stream.id}: {self._name}"
 
     async def async_update(self):
         """Retrieve latest state."""
