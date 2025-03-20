@@ -102,10 +102,10 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
     # Stream names are processed to differentiate same-named streams by stream type
     # This helps support default AmpliPi 1 + AmpliPi 2 spotify and airplay streams
     # Without this processing, you always select the default spotify streams when trying to select airplay streams
+    # If you update this, you must also update stream naming conventions in AmpliPiSource.process_stream() and AmpliPiStream.unique_id naming conventions
     streams = []
     for stream in status.streams:
         stream.name = f"{DOMAIN} {stream.type} Stream: {stream.name}"
-        stream.entity_id = f"{DOMAIN}_{stream.type}_stream_{stream.name}".lower()
         streams.append(stream)
 
     sources: list[MediaPlayerEntity] = [
@@ -121,7 +121,7 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
         for group in status.groups]
     
     streams: list[MediaPlayerEntity] = [
-        AmpliPiStream(stream, status.sources, vendor, version, image_base_path, amplipi)
+        AmpliPiStream(DOMAIN, stream, status.sources, vendor, version, image_base_path, amplipi)
         for stream in streams
     ]
     
@@ -278,6 +278,7 @@ class AmpliPiSource(MediaPlayerEntity):
     
     def process_stream(self, stream: str):
         """converts stream names and ids to the same string for use with attaching a name to a face during async_select_source"""
+        # If you update this, you must also update stream naming conventions in both AmpliPiStream.__init__ and async_setup_entry
         ret = str(stream)
         ret = ret.replace("_", " ")
         ret = ret.strip(":")
@@ -1126,7 +1127,7 @@ class AmpliPiStream(MediaPlayerEntity):
     async def async_turn_on(self): # I would like for this to be supported, but I cannot figure out how yet
         await self.find_source()
 
-    def __init__(self, stream,
+    def __init__(self, namespace: str, stream: Stream,
                  sources: List[Source],
                  vendor: str, version: str, image_base_path: str,
                  client: AmpliPi):
@@ -1137,8 +1138,10 @@ class AmpliPiStream(MediaPlayerEntity):
         self._sources = sources
 
         self._id = stream.id
+
+        # If you update this, you must also update stream naming conventions AmpliPiSource.process_stream() and async_setup_entry
         self._name = stream.name
-        self._unique_id = stream.entity_id
+        self._unique_id = f"{namespace}_{stream.type}_stream_{stream.name}".lower()
         
         self._image_base_path = image_base_path
         self._vendor = vendor
