@@ -105,7 +105,12 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
     # If you update this, you must also update stream naming conventions in AmpliPiSource.process_stream() and AmpliPiStream.unique_id naming conventions
     streams = []
     for stream in status.streams:
-        stream.name = f"{DOMAIN} {stream.type} Stream: {stream.name}"
+        stream_type = stream.type
+        stream_type = stream_type[0].upper()
+
+        namespace = DOMAIN
+        namespace = namespace[0].upper()
+        stream.name = f"{namespace} {stream_type} Stream: {stream.name}"
         streams.append(stream)
 
     sources: list[MediaPlayerEntity] = [
@@ -1272,7 +1277,7 @@ class AmpliPiStream(MediaPlayerEntity):
     @property
     def name(self):
         """Return the name of the stream."""
-        return f"AmpliPi Stream: {self._name}"
+        return {self._name}
 
     async def async_update(self):
         """Retrieve latest state."""
