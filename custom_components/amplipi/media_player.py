@@ -843,24 +843,33 @@ class AmpliPiZone(MediaPlayerEntity):
             return self._zone.mute
 
     async def async_select_source(self, source):
-        source_id = int(source.split(' ')[1]) - 1
-        self._selected_source = source
-        if self._is_group:
-            await self._update_group(
-                MultiZoneUpdate(
-                    groups=[self._group.id],
-                    update=ZoneUpdate(
+        # source can either be the name of a source or the sources ID depending on if this function was called from an automation or directly from the dropdown
+        source_id = None
+        if "_" in source:
+            # source is something like "media_player.amplipi_source_1"
+            source_split = source.split('_')
+            source_id = int(source_split[len(source_split) - 1]) - 1
+        else:
+            # source is something like "Source 1"
+            source_id = int(source.split(' ')[1]) - 1
+        self._current_source = source
+        if source_id is not None:
+            if self._is_group:
+                await self._update_group(
+                    MultiZoneUpdate(
+                        groups=[self._group.id],
+                        update=ZoneUpdate(
+                            source_id=source_id
+                        )
+                    )
+                )
+            else:
+                await self._update_zone(
+                    ZoneUpdate(
                         source_id=source_id
                     )
                 )
-            )
-        else:
-            await self._update_zone(
-                ZoneUpdate(
-                    source_id=source_id
-                )
-            )
-        await self.async_update()
+            await self.async_update()
 
     async def _update_zone(self, update: ZoneUpdate):
         await self._client.set_zone(self._id, update)
@@ -1120,6 +1129,7 @@ class AmpliPiStream(MediaPlayerEntity):
         self._version = version
         self._client = client
         self._last_update_successful = False
+        self._attr_device_class = "stream"
         self._attr_source_list = [
             'Source 1',
             'Source 2',
