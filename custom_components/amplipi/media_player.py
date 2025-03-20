@@ -99,21 +99,30 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
 
     status = await amplipi.get_status()
 
+    # Stream names are processed to differentiate same-named streams by stream type
+    # This helps support default AmpliPi 1 + AmpliPi 2 spotify and airplay streams
+    # Without this processing, you always select the default spotify streams when trying to select airplay streams
+    streams = []
+    for stream in status.streams:
+        stream.name = f"{DOMAIN} {stream.type} Stream: {stream.name}"
+        stream.entity_id = f"{DOMAIN}_{stream.type}_stream_{stream.name}".lower()
+        streams.append(stream)
+
     sources: list[MediaPlayerEntity] = [
-        AmpliPiSource(DOMAIN, source, status.streams, vendor, version, image_base_path, amplipi)
+        AmpliPiSource(DOMAIN, source, streams, vendor, version, image_base_path, amplipi)
         for source in status.sources]
 
     zones: list[MediaPlayerEntity] = [
-        AmpliPiZone(DOMAIN, zone, None, status.streams, status.sources, vendor, version, image_base_path, amplipi)
+        AmpliPiZone(DOMAIN, zone, None, streams, status.sources, vendor, version, image_base_path, amplipi)
         for zone in status.zones]
 
     groups: list[MediaPlayerEntity] = [
-        AmpliPiZone(DOMAIN, None, group, status.streams, status.sources, vendor, version, image_base_path, amplipi)
+        AmpliPiZone(DOMAIN, None, group, streams, status.sources, vendor, version, image_base_path, amplipi)
         for group in status.groups]
     
     streams: list[MediaPlayerEntity] = [
-        AmpliPiStream(DOMAIN, stream, status.sources, vendor, version, image_base_path, amplipi)
-        for stream in status.streams
+        AmpliPiStream(stream, status.sources, vendor, version, image_base_path, amplipi)
+        for stream in streams
     ]
     
     announcer: list[MediaPlayerEntity] = [
@@ -266,6 +275,13 @@ class AmpliPiSource(MediaPlayerEntity):
             )
         )
         pass
+    
+    def process_stream(self, stream: str):
+        """converts stream names and ids to the same string for use with attaching a name to a face during async_select_source"""
+        ret = str(stream)
+        ret = ret.replace("_", " ")
+        ret = ret.strip(":")
+        return ret.lower()
 
     async def async_select_source(self, source):
 
@@ -278,7 +294,7 @@ class AmpliPiSource(MediaPlayerEntity):
                 input='None'
             ))
         else:
-            stream = next(filter(lambda z: z.name == source, self._streams), None)
+            stream = next(filter(lambda z: self.process_stream(z.name) == self.process_stream(source), self._streams), None)
             if stream is None:
                 _LOGGER.warning(f'Select Source {source} called but a match could not be found in the stream cache, '
                                 f'{self._streams}')
@@ -1110,7 +1126,7 @@ class AmpliPiStream(MediaPlayerEntity):
     async def async_turn_on(self): # I would like for this to be supported, but I cannot figure out how yet
         await self.find_source()
 
-    def __init__(self, namespace: str, stream,
+    def __init__(self, stream,
                  sources: List[Source],
                  vendor: str, version: str, image_base_path: str,
                  client: AmpliPi):
@@ -1122,7 +1138,7 @@ class AmpliPiStream(MediaPlayerEntity):
 
         self._id = stream.id
         self._name = stream.name
-        self._unique_id = f"{namespace}_{stream.type}_stream_{stream.id}"
+        self._unique_id = stream.entity_id
         
         self._image_base_path = image_base_path
         self._vendor = vendor
