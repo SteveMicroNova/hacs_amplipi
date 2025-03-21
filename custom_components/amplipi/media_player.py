@@ -69,6 +69,13 @@ _LOGGER = logging.getLogger(__name__)
 
 PARALLEL_UPDATES = 1
 
+def process_stream_names(streams: List[Stream]) -> List[Stream]:
+    """Processes stream names to include 'AmpliPi Stream {stream.id}: {stream.name}'"""
+    for stream in streams:
+        if "AmpliPi Stream" not in stream.name:
+            stream.name = f"AmpliPi Stream {stream.id}: {stream.name}"
+    return streams
+
 
 def build_url(api_base_path, img_url):
     if img_url is None:
@@ -138,17 +145,8 @@ class AmpliPiSource(MediaPlayerEntity):
 
     def __init__(self, namespace: str, source: Source, streams: List[Stream], vendor: str, version: str,
                  image_base_path: str, client: AmpliPi):
-        
-        # Stream names are processed to differentiate same-named streams by stream id
-        # This helps support default AmpliPi 1 + AmpliPi 2 spotify and airplay streams
-        # Without this processing, you always select the default spotify streams when trying to select airplay streams
-        # If you update this, you must also update stream naming conventions in AmpliPiSource.process_stream() and AmpliPiStream.unique_id naming conventions
-        processed_streams = []
-        for stream in streams:
-            stream.name = f"AmpliPi Stream {stream.id}: {stream.name}"
-            processed_streams.append(stream)
+        self._streams = process_stream_names(streams)
 
-        self._streams = processed_streams
         self._id = source.id
         self._current_stream = None
         self._image_base_path = image_base_path
@@ -282,15 +280,14 @@ class AmpliPiSource(MediaPlayerEntity):
         """converts stream names and ids to the same string for use with attaching a name to a face during async_select_source"""
         # If you update this, you must also update stream naming conventions in both AmpliPiStream.__init__ and async_setup_entry
         processed = ''.join(re.findall(r'\d', stream))
-        if processed[0] == 1:
+        if int(processed[0]) == 1:
             return processed[:4]
-        elif processed[0] == 9:
+        elif int(processed[0]) == 9:
             return processed[:3]
         else:
             _LOGGER.error("AmpliPiSource.process_stream() could not determine stream ID")
 
     async def async_select_source(self, source):
-
         if self._source is not None and self._source.name == source:
             await self._update_source(SourceUpdate(
                 input='local'
@@ -300,6 +297,7 @@ class AmpliPiSource(MediaPlayerEntity):
                 input='None'
             ))
         else:
+            # You could realistically call self.process_stream(source) directly in the input of the SourceUpdate, but there's a fallback here that I don't want to lose despite never seeing it be used
             stream = next(filter(lambda z: self.process_stream(z.name) == self.process_stream(source), self._streams), None)
             if stream is None:
                 _LOGGER.warning(f'Select Source {source} called but a match could not be found in the stream cache, '
@@ -420,7 +418,8 @@ class AmpliPiSource(MediaPlayerEntity):
 
     def sync_state(self, state: Source, streams: List[Stream], zones: List[Zone], groups: List[Group]):
         self._source = state
-        self._streams = streams
+
+        self._streams = process_stream_names(streams)
 
         self._current_stream = None
 
@@ -589,7 +588,7 @@ class AmpliPiZone(MediaPlayerEntity):
         self._name = group.name if self._is_group else zone.name
         self._unique_id = f"{namespace}_group_{self._id}" if self._is_group else f"{namespace}_zone_{self._id}"
         
-        self._streams = streams
+        self._streams = process_stream_names(streams)
         self._image_base_path = image_base_path
         self._vendor = vendor
         self._version = version
@@ -785,7 +784,7 @@ class AmpliPiZone(MediaPlayerEntity):
                    sources: List[Source], enabled: bool):
         self._zone = zone
         self._group = group
-        self._streams = streams
+        self._streams = process_stream_names(streams)
         self._sources = sources
         self._last_update_successful = True
         self._enabled = enabled
@@ -1136,7 +1135,7 @@ class AmpliPiStream(MediaPlayerEntity):
                  sources: List[Source],
                  vendor: str, version: str, image_base_path: str,
                  client: AmpliPi):
-        self._stream = stream
+        self._stream = process_stream_names([stream])
         self._current_source = None
         self._current_zones = []
         self._current_groups = []
@@ -1146,7 +1145,7 @@ class AmpliPiStream(MediaPlayerEntity):
 
         # If you update this, you must also update stream naming conventions AmpliPiSource.process_stream() and async_setup_entry
         self._name = stream.name
-        self._unique_id = f"{namespace}_stream_{stream.id}_{stream.name}"
+        self._unique_id = stream.name
         
         self._image_base_path = image_base_path
         self._vendor = vendor
@@ -1277,7 +1276,7 @@ class AmpliPiStream(MediaPlayerEntity):
     @property
     def name(self):
         """Return the name of the stream."""
-        return f"AmpliPi Stream {self._stream.id}: {self._name}"
+        return self._name
 
     async def async_update(self):
         """Retrieve latest state."""
@@ -1311,7 +1310,7 @@ class AmpliPiStream(MediaPlayerEntity):
 
 
     def sync_state(self, stream: Stream, sources: List[Source], current_source, zones, groups):
-        self._stream = stream
+        self._stream = process_stream_names([stream])
         self._sources = sources
         self._current_source = current_source
         self._last_update_successful = True
