@@ -2,8 +2,6 @@
 from __future__ import annotations
 import os
 import shutil
-import yaml
-import json
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_HOST, CONF_PORT, CONF_NAME, CONF_ID
