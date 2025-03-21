@@ -6,6 +6,7 @@ from functools import reduce
 from typing import List
 
 import validators
+from homeassistant.helpers.entity_registry import async_get as async_get_entity_registry
 from homeassistant.components import media_source
 from homeassistant.components.media_player import MediaPlayerDeviceClass, MediaPlayerEntity, MediaPlayerEntityFeature, MediaType
 from homeassistant.components.media_player.browse_media import (
@@ -15,7 +16,7 @@ from homeassistant.const import CONF_NAME, STATE_PLAYING, STATE_PAUSED, STATE_ID
 from homeassistant.helpers.entity import DeviceInfo
 from pyamplipi.amplipi import AmpliPi
 from pyamplipi.models import ZoneUpdate, Source, SourceUpdate, GroupUpdate, Stream, Group, Zone, Announcement, \
-    MultiZoneUpdate, PlayMedia
+    MultiZoneUpdate, PlayMedia, Status
 
 from .const import (
     DOMAIN, AMPLIPI_OBJECT, CONF_VENDOR, CONF_VERSION, CONF_WEBAPP, )
@@ -72,9 +73,14 @@ PARALLEL_UPDATES = 1
 def process_stream_names(streams: List[Stream]) -> List[Stream]:
     """Processes stream names to include 'AmpliPi Stream {stream.id}: {stream.name}'"""
     for stream in streams:
+        # Need to check if name was already processed so you don't get stuff like:
+        # "AmpliPi Stream 996: AmpliPi Stream 996: AmpliPi Stream 996: Input 1" due to back population
         if "AmpliPi Stream" not in stream.name:
             stream.name = f"AmpliPi Stream {stream.id}: {stream.name}"
     return streams
+
+def extract_source_id_from_name(source: str):
+    return int(''.join(re.findall(r'\d', source))[0]) - 1
 
 
 def build_url(api_base_path, img_url):
@@ -93,10 +99,39 @@ def build_url(api_base_path, img_url):
 
     return None
 
+async def migrate_entities(hass, status: Status):
+    """Contains every past name and ID schema to automatically migrate old schemas to the newest ones, with the intents of retaining user setups during updates"""
+    # This should have minimal updates, try not to need this function
+    entity_registry = await async_get_entity_registry(hass)
+
+    sources = status.sources
+    zones = status.zones
+    groups = status.groups
+    streams = status.streams
+
+    for source in sources:
+        # Example for how to migrate entity IDs, should we ever need to
+        # Keep a list of all old schemas so updates will always be forward-compatible to the newest schema
+        # old_id_schemas = [
+        #     f"media_player.amplipi_source_{source.id + 1}",
+        # ]
+        # for schema in old_id_schemas:
+        #     await entity_registry.async_update_entity(f"media_player.amplipi_source_{source.id + 1}", entity_id=f"media_player.amplipi_source_{source.id + 1}")
+
+        await entity_registry.async_update_entity(f"media_player.amplipi_source_{source.id + 1}", name=f"AmpliPi Source: {source.name}")
+    
+    for zone in zones:
+        await entity_registry.async_update_entity(f"media_player.amplipi_zone_{str(zone.name).replace(' ', '_').lower()}", name=f"AmpliPi Zone: {zone.name}")
+    
+    for group in groups:
+        await entity_registry.async_update_entity(f"media_player.amplipi_group_{str(group.name).replace(' ', '_').lower()}", name=f"AmpliPi Group: {group.name}")
+    
+    for stream in streams:
+        await entity_registry.async_update_entity(f"media_player.amplipi_stream_{stream.id}_{str(stream.name).replace(' ', '_').lower()}", name=process_stream_names([stream])[0])
+
 
 async def async_setup_entry(hass, config_entry, async_add_entities):
     """Set up the AmpliPi MultiZone Audio Controller"""
-
     hass_entry = hass.data[DOMAIN][config_entry.entry_id]
 
     amplipi: AmpliPi = hass_entry[AMPLIPI_OBJECT]
@@ -106,6 +141,8 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
     image_base_path = f'{hass_entry[CONF_WEBAPP]}'
 
     status = await amplipi.get_status()
+
+    await migrate_entities(hass, status)
 
     sources: list[MediaPlayerEntity] = [
         AmpliPiSource(DOMAIN, source, status.streams, vendor, version, image_base_path, amplipi)
@@ -276,16 +313,16 @@ class AmpliPiSource(MediaPlayerEntity):
         )
         pass
     
-    def process_stream(self, stream: str):
-        """converts stream names and ids to the same string for use with attaching a name to a face during async_select_source"""
-        # If you update this, you must also update stream naming conventions in both AmpliPiStream.__init__ and async_setup_entry
+    def process_stream_id(self, stream: str):
+        """Pulls the stream.id out of a stream name"""
         processed = ''.join(re.findall(r'\d', stream))
+        # Only return first n digits in case there's a stream name with numbers in it
         if int(processed[0]) == 1:
             return processed[:4]
         elif int(processed[0]) == 9:
             return processed[:3]
         else:
-            _LOGGER.error("AmpliPiSource.process_stream() could not determine stream ID")
+            _LOGGER.error("AmpliPiSource.process_stream_id() could not determine stream ID")
 
     async def async_select_source(self, source):
         if self._source is not None and self._source.name == source:
@@ -297,8 +334,8 @@ class AmpliPiSource(MediaPlayerEntity):
                 input='None'
             ))
         else:
-            # You could realistically call self.process_stream(source) directly in the input of the SourceUpdate, but there's a fallback here that I don't want to lose despite never seeing it be used
-            stream = next(filter(lambda z: self.process_stream(z.name) == self.process_stream(source), self._streams), None)
+            # Process both the input and the known name in case the entity_id is sent back for processing
+            stream = next(filter(lambda z: self.process_stream_id(z.name) == self.process_stream_id(source), self._streams), None)
             if stream is None:
                 _LOGGER.warning(f'Select Source {source} called but a match could not be found in the stream cache, '
                                 f'{self._streams}')
@@ -584,10 +621,15 @@ class AmpliPiZone(MediaPlayerEntity):
         self._sources = sources
         self._is_group = group is not None
 
-        self._id = group.id if self._is_group else zone.id
-        self._name = group.name if self._is_group else zone.name
-        self._unique_id = f"{namespace}_group_{self._id}" if self._is_group else f"{namespace}_zone_{self._id}"
-        
+        if self._is_group:
+            self._id = group.id
+            self._name = group.name
+            self._unique_id = f"{namespace}_group_{self._id}"
+        else:
+            self._id = zone.id
+            self._name = zone.name
+            self._unique_id = f"{namespace}_zone_{self._id}"
+
         self._streams = process_stream_names(streams)
         self._image_base_path = image_base_path
         self._vendor = vendor
@@ -864,15 +906,9 @@ class AmpliPiZone(MediaPlayerEntity):
             return self._zone.mute
 
     async def async_select_source(self, source):
-        # source can either be the name of a source or the sources ID depending on if this function was called from an automation or directly from the dropdown
-        source_id = None
-        if "_" in source:
-            # source is something like "media_player.amplipi_source_1"
-            source_split = source.split('_')
-            source_id = int(source_split[len(source_split) - 1]) - 1
-        else:
-            # source is something like "Source 1"
-            source_id = int(source.split(' ')[1]) - 1
+        # source can either be the name of a source or the source's entity ID depending on if this function was called from an automation or directly from the dropdown
+        # Either way, it will contain the ID number in it, use a regex to only return digits and then only use the first one in case we ever allow users to name their sources
+        source_id = extract_source_id_from_name(source)
         self._current_source = source
         if source_id is not None:
             if self._is_group:
@@ -1035,7 +1071,7 @@ class AmpliPiAnnouncer(MediaPlayerEntity):
         self._image_base_path = image_base_path
         self._name = "AmpliPi Announcement"
         self._volume = 0.5
-        self._attr_device_class = MediaPlayerDeviceClass.RECEIVER
+        self._attr_device_class = MediaPlayerDeviceClass.SPEAKER
 
     @property
     def available(self):
@@ -1135,15 +1171,13 @@ class AmpliPiStream(MediaPlayerEntity):
                  sources: List[Source],
                  vendor: str, version: str, image_base_path: str,
                  client: AmpliPi):
-        self._stream = process_stream_names([stream])
+        self._stream = process_stream_names([stream])[0]
         self._current_source = None
         self._current_zones = []
         self._current_groups = []
         self._sources = sources
 
         self._id = stream.id
-
-        # If you update this, you must also update stream naming conventions AmpliPiSource.process_stream() and async_setup_entry
         self._name = stream.name
         self._unique_id = stream.name
         
@@ -1152,6 +1186,7 @@ class AmpliPiStream(MediaPlayerEntity):
         self._version = version
         self._client = client
         self._last_update_successful = False
+        # not a real device class, but allows us to match streams and only streams with the start_streaming blueprint's streams dropdown
         self._attr_device_class = "stream"
         self._attr_source_list = [
             'Source 1',
@@ -1310,7 +1345,7 @@ class AmpliPiStream(MediaPlayerEntity):
 
 
     def sync_state(self, stream: Stream, sources: List[Source], current_source, zones, groups):
-        self._stream = process_stream_names([stream])
+        self._stream = process_stream_names([stream])[0]
         self._sources = sources
         self._current_source = current_source
         self._last_update_successful = True
@@ -1389,7 +1424,7 @@ class AmpliPiStream(MediaPlayerEntity):
         return True
 
     async def async_select_source(self, source):
-        source_id = int(source.split(' ')[1]) - 1
+        source_id = extract_source_id_from_name(source)
         self._current_source = next((s for s in self._sources if s.id == source_id), self._current_source)
         await self._update_source(
             source_id,
@@ -1448,7 +1483,7 @@ class AmpliPiStream(MediaPlayerEntity):
 
     async def find_source(self):
         """Connects stream to first available source"""
-        #No source, see if we can find an empty one
+        # No source, see if we can find an empty one
         if self._current_source is None:
             sources = await self._client.get_sources()
             for source in sources:
